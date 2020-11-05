@@ -23,7 +23,7 @@ const routes: React.FC<Props> = () => {
       <Route path='/admin'>
         <AdminRoutes />
       </Route>
-      <Route path='/products/:id'>
+      <Route path='/products/:productId'>
         <ProductDetail />
       </Route>
       <Route path='/products'>
