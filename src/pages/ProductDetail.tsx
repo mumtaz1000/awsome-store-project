@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
+import Button from '../components/Button'
 import PageNotFound from './PageNotFound'
 import { Product, products } from '../data/products'
 
@@ -56,7 +57,7 @@ const ProductDetail: React.FC<Props> = () => {
           <div className='qty-action'>+</div>
         </div>
 
-        <button>Add to Cart</button>
+        <Button>Add to Cart</Button>
       </div>
     </div>
   )
