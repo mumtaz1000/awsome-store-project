@@ -5,6 +5,7 @@ import Layout from './Layout'
 import Routes from './routes/Routes'
 
 import './App.css'
+import './fontawesome'
 
 function App() {
   return (
