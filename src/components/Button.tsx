@@ -1,5 +1,7 @@
 import React, { ButtonHTMLAttributes, forwardRef, Ref } from 'react'
 
+import Spinner from './Spinner'
+
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
   height?: string
   width?: string
@@ -19,6 +21,10 @@ const Button = forwardRef(
       height = '2.7rem',
       width = '9rem',
       loading,
+      spinnerColor,
+      spinnerHeight,
+      spinnerWidth,
+      ...props
     }: Props,
     ref: Ref<HTMLButtonElement>
   ) => {
@@ -26,15 +32,23 @@ const Button = forwardRef(
       <button
         ref={ref}
         className={`btn ${className}`}
-        disabled={disabled}
         style={{
-          cursor: loading ? 'not-allowed' : undefined,
+          cursor: loading || disabled ? 'not-allowed' : undefined,
           height,
           width,
           ...style,
         }}
+        {...props}
       >
-        {children}
+        {loading ? (
+          <Spinner
+            color={spinnerColor}
+            height={spinnerHeight}
+            width={spinnerWidth}
+          />
+        ) : (
+          children
+        )}
       </button>
     )
   }
