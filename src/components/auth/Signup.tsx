@@ -62,6 +62,7 @@ const SIgnup: React.FC<Props> = () => {
           />
 
           <Input
+            type='password'
             name='password'
             label='Password'
             placeholder='Your password'
