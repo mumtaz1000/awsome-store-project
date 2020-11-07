@@ -3,19 +3,16 @@ import { useForm } from 'react-hook-form'
 
 import Button from '../Button'
 import Input from '../Input'
+import { useAuthenticate } from '../../hooks'
+import { SignupData } from '../../types'
 
 interface Props {}
 
-const SIgnup: React.FC<Props> = () => {
-  const { register, errors, handleSubmit } = useForm<{
-    username: string
-    email: string
-    password: string
-  }>()
+const Signup: React.FC<Props> = () => {
+  const { signup, loading, error } = useAuthenticate()
+  const { register, errors, handleSubmit } = useForm<SignupData>()
 
-  const handleSignup = handleSubmit((data) => {
-    console.log(data)
-  })
+  const handleSignup = handleSubmit((data) => signup(data))
 
   return (
     <>
@@ -80,13 +77,15 @@ const SIgnup: React.FC<Props> = () => {
             })}
           />
 
-          <Button width='100%' style={{ margin: '0.5rem 0' }}>
+          <Button loading={loading} width='100%' style={{ margin: '0.5rem 0' }}>
             Submit
           </Button>
         </form>
+
+        {error && <p className='paragraph paragraph--error'>{error}</p>}
       </div>
     </>
   )
 }
 
-export default SIgnup
+export default Signup
