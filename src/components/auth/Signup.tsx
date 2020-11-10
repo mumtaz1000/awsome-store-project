@@ -12,7 +12,11 @@ const Signup: React.FC<Props> = () => {
   const { signup, loading, error } = useAuthenticate()
   const { register, errors, handleSubmit } = useForm<SignupData>()
 
-  const handleSignup = handleSubmit((data) => signup(data))
+  const handleSignup = handleSubmit(async (data) => {
+    const response = await signup(data)
+
+    console.log('Res -->', response)
+  })
 
   return (
     <>
