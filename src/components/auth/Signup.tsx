@@ -3,27 +3,33 @@ import { useForm } from 'react-hook-form'
 
 import Button from '../Button'
 import Input from '../Input'
+import { useModalContext } from '../../state/modal-context'
 import { useAuthenticate } from '../../hooks'
 import { SignupData } from '../../types'
 
 interface Props {}
 
 const Signup: React.FC<Props> = () => {
+  const { setModalType } = useModalContext()
   const { signup, loading, error } = useAuthenticate()
   const { register, errors, handleSubmit } = useForm<SignupData>()
 
   const handleSignup = handleSubmit(async (data) => {
     const response = await signup(data)
 
-    console.log('Res -->', response)
+    if (response) setModalType('close')
   })
 
   return (
     <>
-      <div className='backdrop'> </div>
+      <div className='backdrop' onClick={() => setModalType('close')}>
+        {' '}
+      </div>
 
       <div className='modal modal--auth-form'>
-        <div className='modal-close'>&times;</div>
+        <div className='modal-close' onClick={() => setModalType('close')}>
+          &times;
+        </div>
 
         <h3 className='header--center paragraph--orange'>
           Sign up to AwesomeShop

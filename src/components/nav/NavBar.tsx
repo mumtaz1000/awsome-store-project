@@ -2,10 +2,13 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 
 import Button from '../Button'
+import { useModalContext } from '../../state/modal-context'
 
 interface Props {}
 
 const NavBar: React.FC<Props> = () => {
+  const { setModalType } = useModalContext()
+
   return (
     <header className='head'>
       <div className='head__section'>
@@ -27,7 +30,12 @@ const NavBar: React.FC<Props> = () => {
             <div className='navbar__lists'></div>
             <div className='navbar__profile'>
               <Button className='btn--sign'>Sign in</Button>
-              <Button className='btn--sign'>Sign up</Button>
+              <Button
+                className='btn--sign'
+                onClick={() => setModalType('signup')}
+              >
+                Sign up
+              </Button>
             </div>
           </ul>
         </nav>
