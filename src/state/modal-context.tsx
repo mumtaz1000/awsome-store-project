@@ -1,11 +1,11 @@
 import React, {
   createContext,
-  useContext,
   ReactElement,
   Dispatch,
   SetStateAction,
   useState,
   useEffect,
+  useContext,
 } from 'react'
 
 import Signup from '../components/auth/Signup'
@@ -13,14 +13,16 @@ import Signup from '../components/auth/Signup'
 interface Props {}
 
 type ModalType = 'close' | 'signup' | 'signin' | 'reset_password'
-type Modals = { [key in ModalType]: ReactElement | null }
+type Modals = {
+  [key in ModalType]: ReactElement | null
+}
 
 type ModalState = {
   modal: ReactElement | null
   setModalType: Dispatch<SetStateAction<ModalType>>
 }
 
-export const ModalContext = createContext<ModalState | undefined>(undefined)
+const ModalContext = createContext<ModalState | undefined>(undefined)
 
 const modals: Modals = {
   close: null,
@@ -50,7 +52,9 @@ export const useModalContext = () => {
   const context = useContext(ModalContext)
 
   if (context === undefined)
-    throw new Error('useModalContext must be used within ModalContextProvider.')
+    throw new Error(
+      'useModalContext must be used within the ModalContextProvider.'
+    )
 
   return context
 }
