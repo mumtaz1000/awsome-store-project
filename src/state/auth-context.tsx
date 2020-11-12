@@ -53,14 +53,14 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
   // Listen to auth state change in firebase authentication
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) authDispatch(fetchAuthUser(user))
-      else authDispatch(fetchAuthUser(null))
+      // if (user) authDispatch(fetchAuthUser(user))
+      // else authDispatch(fetchAuthUser(null))
+      authDispatch(fetchAuthUser(user))
     })
 
     return () => unsubscribe()
   }, [])
 
-  console.log('Auth user -->', authState)
   return (
     <AuthStateContext.Provider value={authState}>
       <AuthDispatchContext.Provider value={authDispatch}>
@@ -72,7 +72,7 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
 
 export default AuthContextProvider
 
-export const userAuthContext = () => {
+export const useAuthContext = () => {
   const authState = useContext(AuthStateContext)
   const authDispatch = useContext(AuthDispatchContext)
 
