@@ -53,9 +53,8 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
   // Listen to auth state change in firebase authentication
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      // if (user) authDispatch(fetchAuthUser(user))
-      // else authDispatch(fetchAuthUser(null))
-      authDispatch(fetchAuthUser(user))
+      if (user) authDispatch(fetchAuthUser(user))
+      else authDispatch(fetchAuthUser(null))
     })
 
     return () => unsubscribe()
