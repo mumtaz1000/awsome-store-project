@@ -19,14 +19,10 @@ type Modals = {
 
 type ModalState = {
   modal: ReactElement | null
-}
-
-type ModalDispatch = {
   setModalType: Dispatch<SetStateAction<ModalType>>
 }
 
-const ModalStateContext = createContext<ModalState | undefined>(undefined)
-const ModalDispatchContext = createContext<ModalDispatch | undefined>(undefined)
+const ModalContext = createContext<ModalState | undefined>(undefined)
 
 const modals: Modals = {
   close: null,
@@ -44,24 +40,21 @@ const ModalContextProvider: React.FC<Props> = ({ children }) => {
   }, [modalType])
 
   return (
-    <ModalStateContext.Provider value={{ modal }}>
-      <ModalDispatchContext.Provider value={{ setModalType }}>
-        {children}
-      </ModalDispatchContext.Provider>
-    </ModalStateContext.Provider>
+    <ModalContext.Provider value={{ modal, setModalType }}>
+      {children}
+    </ModalContext.Provider>
   )
 }
 
 export default ModalContextProvider
 
 export const useModalContext = () => {
-  const modalState = useContext(ModalStateContext)
-  const modalDispatch = useContext(ModalDispatchContext)
+  const context = useContext(ModalContext)
 
-  if (modalState === undefined || modalDispatch === undefined)
+  if (context === undefined)
     throw new Error(
       'useModalContext must be used within the ModalContextProvider.'
     )
 
-  return { ...modalState, ...modalDispatch }
+  return context
 }
