@@ -1,4 +1,9 @@
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faPlus, faMinus } from '@fortawesome/free-solid-svg-icons'
+import {
+  faPlus,
+  faMinus,
+  faCartArrowDown,
+  faUserCircle,
+} from '@fortawesome/free-solid-svg-icons'
 
-library.add(faPlus, faMinus)
+library.add(faPlus, faMinus, faCartArrowDown, faUserCircle)
