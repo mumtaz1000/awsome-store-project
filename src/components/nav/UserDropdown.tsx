@@ -1,12 +1,12 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
 
 import Button from '../Button'
+import ClientDropdown from './ClientDropdown'
 import { useAuthContext } from '../../state/auth-context'
 
 interface Props {}
 
-const Sidebar: React.FC<Props> = () => {
+const UserDropdown: React.FC<Props> = () => {
   const {
     authState: { authUser },
   } = useAuthContext()
@@ -23,27 +23,10 @@ const Sidebar: React.FC<Props> = () => {
         </div>
 
         {/* Client user */}
-        <div className='sidebar__section sidebar__section--nav'>
-          <li className='list'>
-            <NavLink to='/product' className='list-link'>
-              PRODUCTS
-            </NavLink>
-          </li>
-          <li className='list'>
-            <NavLink to='/buy/my-cart' className='list-link'>
-              MY CART
-            </NavLink>
-          </li>
-          <li className='list'>
-            <NavLink to='/orders/my-orders' className='list-link'>
-              MY ORDERS
-            </NavLink>
-          </li>
-        </div>
+        <ClientDropdown />
 
         {/* Admin user */}
-        {/* <div className='sidebar__section'></div>
-        <div className='sidebar__section'></div> */}
+        {/* <AdminDropdown /> */}
 
         {/* Logout */}
         <div className='sidebar__section'>
@@ -59,4 +42,4 @@ const Sidebar: React.FC<Props> = () => {
   )
 }
 
-export default Sidebar
+export default UserDropdown
