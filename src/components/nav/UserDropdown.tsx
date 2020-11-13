@@ -3,6 +3,7 @@ import React from 'react'
 import Button from '../Button'
 import ClientDropdown from './ClientDropdown'
 import { useAuthContext, openUserDropdown } from '../../state/auth-context'
+import { useAuthenticate } from '../../hooks/useAuthenticate'
 
 interface Props {}
 
@@ -11,6 +12,7 @@ const UserDropdown: React.FC<Props> = () => {
     authState: { authUser },
     authDispatch,
   } = useAuthContext()
+  const { signout } = useAuthenticate()
 
   return (
     <div className='page page--sidebar'>
@@ -33,7 +35,9 @@ const UserDropdown: React.FC<Props> = () => {
 
         {/* Logout */}
         <div className='sidebar__section'>
-          <Button className='btn--sidebar-signout'>Sign out</Button>
+          <Button className='btn--sidebar-signout' onClick={() => signout()}>
+            Sign out
+          </Button>
         </div>
 
         {/* Close sidebar */}

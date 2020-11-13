@@ -1,8 +1,10 @@
+import {useAuthContext, openUserDropdown} from '../state/auth-context'
 import { useAsyncCall } from './useAsyncCall'
 import { SignupData } from '../types'
 import { auth, functions } from '../firebase/config'
 
 export const useAuthenticate = () => {
+  const {authState: {isUserDropdownOpen}, authDispatch} = useAuthContext()
   const { loading, setLoading, error, setError } = useAsyncCall()
 
   const signup = async (data: SignupData) => {
@@ -43,5 +45,11 @@ export const useAuthenticate = () => {
     }
   }
 
-  return { signup, loading, error }
+  const signout = () => {
+    auth.signOut().then(() => {
+      if (isUserDropdownOpen) authDispatch(openUserDropdown(false))
+    }).catch(err => alert('Soryy, something went wrong.'))
+  }
+
+  return { signup, signout, loading, error }
 }
