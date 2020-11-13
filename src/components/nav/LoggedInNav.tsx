@@ -2,9 +2,13 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
+import { useAuthContext, openUserDropdown } from '../../state/auth-context'
+
 interface Props {}
 
 const LoggedInNav: React.FC<Props> = () => {
+  const { authDispatch } = useAuthContext()
+
   return (
     <ul className='navbar'>
       <div className='navbar__lists'>
@@ -26,6 +30,7 @@ const LoggedInNav: React.FC<Props> = () => {
             icon={['fas', 'user-circle']}
             color='white'
             size='2x'
+            onMouseOver={() => authDispatch(openUserDropdown(true))}
           />
         </div>
       </div>

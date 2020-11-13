@@ -12,10 +12,12 @@ import { auth } from '../firebase/config'
 interface Props {}
 
 type FETCH_AUTH_USER = { type: 'FETCH_AUTH_USER'; payload: AuthUser | null }
-type AuthActions = FETCH_AUTH_USER
+type OPEN_USER_DROPDOWN = {type: 'OPEN_USER_DROPDOWN'; payload: boolean}
+type AuthActions = FETCH_AUTH_USER | OPEN_USER_DROPDOWN
 
 type AuthState = {
   authUser: AuthUser | null
+  isUserDropdownOpen: boolean
 }
 
 type AuthDispatch = Dispatch<AuthActions>
@@ -24,9 +26,14 @@ const AuthStateContext = createContext<AuthState | undefined>(undefined)
 const AuthDispatchContext = createContext<AuthDispatch | undefined>(undefined)
 
 // Action creators
-const fetchAuthUser = (user: AuthUser | null): FETCH_AUTH_USER => ({
+export const fetchAuthUser = (user: AuthUser | null): FETCH_AUTH_USER => ({
   type: 'FETCH_AUTH_USER',
   payload: user,
+})
+
+export const openUserDropdown = (open: boolean): OPEN_USER_DROPDOWN => ({
+  type: 'OPEN_USER_DROPDOWN',
+  payload: open
 })
 
 // Reducer function
@@ -38,6 +45,12 @@ const authReducer = (state: AuthState, action: AuthActions): AuthState => {
         authUser: action.payload,
       }
 
+      case 'OPEN_USER_DROPDOWN':
+        return {
+          ...state,
+          isUserDropdownOpen: action.payload
+        }
+
     default:
       return state
   }
@@ -45,6 +58,7 @@ const authReducer = (state: AuthState, action: AuthActions): AuthState => {
 
 const initialState: AuthState = {
   authUser: null,
+  isUserDropdownOpen: false
 }
 
 const AuthContextProvider: React.FC<Props> = ({ children }) => {

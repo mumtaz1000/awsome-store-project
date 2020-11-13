@@ -2,19 +2,22 @@ import React from 'react'
 
 import Button from '../Button'
 import ClientDropdown from './ClientDropdown'
-import { useAuthContext } from '../../state/auth-context'
+import { useAuthContext, openUserDropdown } from '../../state/auth-context'
 
 interface Props {}
 
 const UserDropdown: React.FC<Props> = () => {
   const {
     authState: { authUser },
+    authDispatch,
   } = useAuthContext()
 
   return (
     <div className='page page--sidebar'>
-      <div className='backdrop'></div>
-      <div className='sidebar sidebar-show'>
+      <div
+        className='sidebar sidebar-show'
+        onMouseLeave={() => authDispatch(openUserDropdown(false))}
+      >
         <div className='sidebar__section sidebar__section--profile'>
           <h3 className='header--center header--sidebar'>
             {authUser?.displayName}
