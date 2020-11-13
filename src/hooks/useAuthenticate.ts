@@ -1,10 +1,13 @@
-import {useAuthContext, openUserDropdown} from '../state/auth-context'
+import { useAuthContext, openUserDropdown } from '../state/auth-context'
 import { useAsyncCall } from './useAsyncCall'
 import { SignupData } from '../types'
 import { auth, functions } from '../firebase/config'
 
 export const useAuthenticate = () => {
-  const {authState: {isUserDropdownOpen}, authDispatch} = useAuthContext()
+  const {
+    authState: { isUserDropdownOpen },
+    authDispatch,
+  } = useAuthContext()
   const { loading, setLoading, error, setError } = useAsyncCall()
 
   const signup = async (data: SignupData) => {
@@ -46,10 +49,38 @@ export const useAuthenticate = () => {
   }
 
   const signout = () => {
-    auth.signOut().then(() => {
-      if (isUserDropdownOpen) authDispatch(openUserDropdown(false))
-    }).catch(err => alert('Soryy, something went wrong.'))
+    auth
+      .signOut()
+      .then(() => {
+        if (isUserDropdownOpen) authDispatch(openUserDropdown(false))
+      })
+      .catch((err) => alert('Soryy, something went wrong.'))
   }
 
-  return { signup, signout, loading, error }
+  const signin = async (data: Omit<SignupData, 'username'>) => {
+    const { email, password } = data
+
+    try {
+      setLoading(true)
+
+      const response = await auth.signInWithEmailAndPassword(email, password)
+
+      if (!response) {
+        setError('Sorry, something went wrong.')
+        setLoading(false)
+        return
+      }
+
+      setLoading(false)
+
+      return response
+    } catch (err) {
+      const { message } = err as { message: string }
+
+      setError(message)
+      setLoading(false)
+    }
+  }
+
+  return { signup, signin, signout, loading, error }
 }

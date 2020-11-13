@@ -11,7 +11,9 @@ const LoggedOutNav: React.FC<Props> = () => {
   return (
     <ul className='navbar'>
       <div className='navbar__profile'>
-        <Button className='btn--sign'>Sign in</Button>
+        <Button className='btn--sign' onClick={() => setModalType('signin')}>
+          Sign in
+        </Button>
         <Button className='btn--sign' onClick={() => setModalType('signup')}>
           Sign up
         </Button>

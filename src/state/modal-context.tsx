@@ -9,6 +9,7 @@ import React, {
 } from 'react'
 
 import Signup from '../components/auth/Signup'
+import Signin from '../components/auth/Signin'
 
 interface Props {}
 
@@ -27,7 +28,7 @@ const ModalContext = createContext<ModalState | undefined>(undefined)
 const modals: Modals = {
   close: null,
   signup: <Signup />,
-  signin: null,
+  signin: <Signin />,
   reset_password: null,
 }
 
