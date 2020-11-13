@@ -1,7 +1,7 @@
 import React from 'react'
 
-import NavBar from './components/nav/NavBar'
-import Sidebar from './components/nav/Sidebar'
+import MainNav from './components/nav/MainNav'
+// import Sidebar from './components/nav/Sidebar'
 import { useModalContext } from './state/modal-context'
 
 interface Props {}
@@ -11,8 +11,8 @@ const Layout: React.FC<Props> = ({ children }) => {
 
   return (
     <div>
-      <NavBar />
-      <Sidebar />
+      <MainNav />
+      {/* <Sidebar /> */}
       <div className='page'>{children}</div>
 
       {modal && modal}
