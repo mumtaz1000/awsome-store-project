@@ -7,3 +7,5 @@ export type SignupData = {
   email: string
   password: string
 }
+
+export type Provider = 'facebook' | 'google'
