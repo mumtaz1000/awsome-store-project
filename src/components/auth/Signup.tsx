@@ -90,9 +90,20 @@ const Signup: React.FC<Props> = () => {
           <Button loading={loading} width='100%' style={{ margin: '0.5rem 0' }}>
             Submit
           </Button>
+
+          {error && <p className='paragraph paragraph--error'>{error}</p>}
         </form>
 
-        {error && <p className='paragraph paragraph--error'>{error}</p>}
+        <p className='paragraph paragraph--focus paragraph--small'>
+          Already have an account?{' '}
+          <span
+            className='paragraph--orange paragraph--link'
+            onClick={() => setModalType('signin')}
+          >
+            sign in
+          </span>{' '}
+          instead.
+        </p>
       </div>
     </>
   )

@@ -32,11 +32,9 @@ const Signin: React.FC<Props> = () => {
         <div className='modal-close' onClick={() => setModalType('close')}>
           &times;
         </div>
-
         <h3 className='header--center paragraph--orange'>
           Sign in to AwesomeShop
         </h3>
-
         <form className='form' onSubmit={handleSignin}>
           <Input
             name='email'
@@ -62,9 +60,30 @@ const Signin: React.FC<Props> = () => {
           <Button loading={loading} width='100%' style={{ margin: '0.5rem 0' }}>
             Submit
           </Button>
+
+          {error && <p className='paragraph paragraph--error'>{error}</p>}
         </form>
 
-        {error && <p className='paragraph paragraph--error'>{error}</p>}
+        <p className='paragraph paragraph--focus paragraph--small'>
+          Don't have an account yet?{' '}
+          <span
+            className='paragraph--orange paragraph--link'
+            onClick={() => setModalType('signup')}
+          >
+            sign up
+          </span>{' '}
+          instead.
+        </p>
+
+        <p className='paragraph paragraph--focus paragraph--small'>
+          Forgot your password? Click{' '}
+          <span
+            className='paragraph--orange paragraph--link'
+            onClick={() => setModalType('reset_password')}
+          >
+            here
+          </span>
+        </p>
       </div>
     </>
   )

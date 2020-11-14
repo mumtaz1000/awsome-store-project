@@ -8,7 +8,14 @@ export const useAuthenticate = () => {
     authState: { isUserDropdownOpen },
     authDispatch,
   } = useAuthContext()
-  const { loading, setLoading, error, setError } = useAsyncCall()
+  const {
+    loading,
+    setLoading,
+    error,
+    setError,
+    successMsg,
+    setSuccessMsg,
+  } = useAsyncCall()
 
   const signup = async (data: SignupData) => {
     const { username, email, password } = data
@@ -82,5 +89,22 @@ export const useAuthenticate = () => {
     }
   }
 
-  return { signup, signin, signout, loading, error }
+  const resetPassword = (data: Omit<SignupData, 'username' | 'password'>) => {
+    setLoading(true)
+
+    auth
+      .sendPasswordResetEmail(data.email)
+      .then(() => {
+        setSuccessMsg('Please check your email to reset your password.')
+        setLoading(false)
+      })
+      .catch((err) => {
+        const { message } = err as { message: string }
+
+        setError(message)
+        setLoading(false)
+      })
+  }
+
+  return { signup, signin, signout, loading, error, resetPassword, successMsg }
 }
