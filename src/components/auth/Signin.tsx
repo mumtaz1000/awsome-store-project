@@ -6,12 +6,13 @@ import Input from '../Input'
 import { useModalContext } from '../../state/modal-context'
 import { useAuthenticate } from '../../hooks'
 import { SignupData } from '../../types'
+import SocialMediaLogin from './SocialMediaLogin'
 
 interface Props {}
 
 const Signin: React.FC<Props> = () => {
   const { setModalType } = useModalContext()
-  const { signin, loading, error } = useAuthenticate()
+  const { signin, loading, error, socialLogin } = useAuthenticate()
   const { register, errors, handleSubmit } = useForm<
     Omit<SignupData, 'username'>
   >()
@@ -32,9 +33,18 @@ const Signin: React.FC<Props> = () => {
         <div className='modal-close' onClick={() => setModalType('close')}>
           &times;
         </div>
+
         <h3 className='header--center paragraph--orange'>
           Sign in to AwesomeShop
         </h3>
+
+        <SocialMediaLogin socialLogin={socialLogin} loading={loading} />
+
+        <hr></hr>
+        <p className='paragraph--center paragraph--focus paragraph--small'>
+          Or sign up with an email
+        </p>
+
         <form className='form' onSubmit={handleSignin}>
           <Input
             name='email'

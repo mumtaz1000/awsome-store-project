@@ -1,12 +1,12 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Button from '../Button'
 import Input from '../Input'
+import SocialMediaLogin from './SocialMediaLogin'
 import { useModalContext } from '../../state/modal-context'
 import { useAuthenticate } from '../../hooks'
-import { SignupData, Provider } from '../../types'
+import { SignupData } from '../../types'
 
 interface Props {}
 
@@ -20,12 +20,6 @@ const Signup: React.FC<Props> = () => {
 
     if (response) setModalType('close')
   })
-
-  const handleSocialLogin = async (provider: Provider) => {
-    const response = await socialLogin(provider)
-
-    if (response) setModalType('close')
-  }
 
   return (
     <>
@@ -42,26 +36,7 @@ const Signup: React.FC<Props> = () => {
           Sign up to AwesomeShop
         </h3>
 
-        <div className='social'>
-          <Button
-            className='social-btn social-btn--fb'
-            width='100%'
-            height='3rem'
-            onClick={() => handleSocialLogin('facebook')}
-          >
-            <FontAwesomeIcon icon={['fab', 'facebook-f']} size='1x' />
-            <span>Log in with Facebook</span>
-          </Button>
-          <Button
-            className='social-btn social-btn--google'
-            width='100%'
-            height='3rem'
-            onClick={() => handleSocialLogin('google')}
-          >
-            <FontAwesomeIcon icon={['fab', 'google']} size='1x' />
-            <span>Log in with Google</span>
-          </Button>
-        </div>
+        <SocialMediaLogin socialLogin={socialLogin} loading={loading} />
 
         <hr></hr>
         <p className='paragraph--center paragraph--focus paragraph--small'>
