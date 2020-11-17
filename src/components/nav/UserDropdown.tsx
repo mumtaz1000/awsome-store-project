@@ -2,7 +2,11 @@ import React from 'react'
 
 import Button from '../Button'
 import ClientDropdown from './ClientDropdown'
-import { useAuthContext, openUserDropdown } from '../../state/auth-context'
+import {
+  useAuthContext,
+  openUserDropdown,
+  signoutRedirect,
+} from '../../state/auth-context'
 import { useAuthenticate } from '../../hooks/useAuthenticate'
 
 interface Props {}
@@ -35,7 +39,13 @@ const UserDropdown: React.FC<Props> = () => {
 
         {/* Logout */}
         <div className='sidebar__section'>
-          <Button className='btn--sidebar-signout' onClick={() => signout()}>
+          <Button
+            className='btn--sidebar-signout'
+            onClick={() => {
+              signout()
+              authDispatch(signoutRedirect(true))
+            }}
+          >
             Sign out
           </Button>
         </div>

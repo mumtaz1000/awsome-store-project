@@ -11,18 +11,20 @@ interface Props {}
 const Index: React.FC<Props> = () => {
   const { setModalType } = useModalContext()
   const {
-    authState: { authUser },
+    authState: { authUser, signoutRedirect },
   } = useAuthContext()
   const { state } = useLocation<{ from: string }>()
   const history = useHistory()
 
   useEffect(() => {
     // Open the signin modal after the user has been redirected from some private route
-    if (state?.from) {
-      if (!authUser) setModalType('signin')
-      else history.push(state.from)
+    if (!signoutRedirect) {
+      if (state?.from) {
+        if (!authUser) setModalType('signin')
+        else history.push(state.from)
+      }
     }
-  }, [setModalType, state, authUser, history])
+  }, [setModalType, state, authUser, history, signoutRedirect])
 
   return (
     <div className='page--products'>

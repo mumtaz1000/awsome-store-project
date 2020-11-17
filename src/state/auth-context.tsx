@@ -15,12 +15,18 @@ interface Props {}
 type FETCH_AUTH_USER = { type: 'FETCH_AUTH_USER'; payload: AuthUser | null }
 type OPEN_USER_DROPDOWN = { type: 'OPEN_USER_DROPDOWN'; payload: boolean }
 type FETCH_USER_INFO = { type: 'FETCH_USER_INFO'; payload: UserInfo | null }
-type AuthActions = FETCH_AUTH_USER | OPEN_USER_DROPDOWN | FETCH_USER_INFO
+type SIGNOUT_REDIRECT = { type: 'SIGNOUT_REDIRECT'; payload: boolean }
+type AuthActions =
+  | FETCH_AUTH_USER
+  | OPEN_USER_DROPDOWN
+  | FETCH_USER_INFO
+  | SIGNOUT_REDIRECT
 
 type AuthState = {
   authUser: AuthUser | null
   isUserDropdownOpen: boolean
   userInfo: UserInfo | null
+  signoutRedirect: boolean
 }
 
 type AuthDispatch = Dispatch<AuthActions>
@@ -44,6 +50,11 @@ export const fetchUserInfo = (userInfo: UserInfo | null): FETCH_USER_INFO => ({
   payload: userInfo,
 })
 
+export const signoutRedirect = (redirect: boolean): SIGNOUT_REDIRECT => ({
+  type: 'SIGNOUT_REDIRECT',
+  payload: redirect,
+})
+
 // Reducer function
 const authReducer = (state: AuthState, action: AuthActions): AuthState => {
   switch (action.type) {
@@ -65,6 +76,12 @@ const authReducer = (state: AuthState, action: AuthActions): AuthState => {
         userInfo: action.payload,
       }
 
+    case 'SIGNOUT_REDIRECT':
+      return {
+        ...state,
+        signoutRedirect: action.payload,
+      }
+
     default:
       return state
   }
@@ -74,6 +91,7 @@ const initialState: AuthState = {
   authUser: null,
   isUserDropdownOpen: false,
   userInfo: null,
+  signoutRedirect: false,
 }
 
 const AuthContextProvider: React.FC<Props> = ({ children }) => {
