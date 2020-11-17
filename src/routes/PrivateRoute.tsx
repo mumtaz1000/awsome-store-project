@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Redirect } from 'react-router-dom'
+import { Redirect, useLocation } from 'react-router-dom'
 
 import Spinner from '../components/Spinner'
 import { useAuthContext } from '../state/auth-context'
@@ -12,6 +12,8 @@ const PrivateRoute: React.FC<Props> = ({ children }) => {
     authState: { authUser },
   } = useAuthContext()
 
+  const location = useLocation()
+
   useEffect(() => {
     const checkAuth = setTimeout(() => {
       setAuthChecked(true)
@@ -23,7 +25,17 @@ const PrivateRoute: React.FC<Props> = ({ children }) => {
   if (!authChecked && !authUser)
     return <Spinner color='grey' height={50} width={50} />
 
-  if (authChecked && !authUser) return <Redirect to='/' />
+  if (authChecked && !authUser)
+    return (
+      <Redirect
+        to={{
+          pathname: '/',
+          state: {
+            from: location.pathname,
+          },
+        }}
+      />
+    )
 
   return <>{children}</>
 }
