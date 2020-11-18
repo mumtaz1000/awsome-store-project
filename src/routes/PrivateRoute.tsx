@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, ReactElement } from 'react'
 import { Redirect, useLocation } from 'react-router-dom'
 
 import Spinner from '../components/Spinner'
@@ -9,7 +9,7 @@ interface Props {}
 const PrivateRoute: React.FC<Props> = ({ children }) => {
   const [authChecked, setAuthChecked] = useState(false)
   const {
-    authState: { authUser },
+    authState: { authUser, userRole },
   } = useAuthContext()
 
   const location = useLocation()
@@ -22,10 +22,10 @@ const PrivateRoute: React.FC<Props> = ({ children }) => {
     return () => clearTimeout(checkAuth)
   }, [authUser])
 
-  if (!authChecked && !authUser)
+  if (!authChecked && (!authUser || !userRole))
     return <Spinner color='grey' height={50} width={50} />
 
-  if (authChecked && !authUser)
+  if (authChecked && (!authUser || !userRole))
     return (
       <Redirect
         to={{
@@ -37,7 +37,13 @@ const PrivateRoute: React.FC<Props> = ({ children }) => {
       />
     )
 
-  return <>{children}</>
+  return (
+    <>
+      {React.Children.map(children as ReactElement, (child) =>
+        React.cloneElement(child, { userRole })
+      )}
+    </>
+  )
 }
 
 export default PrivateRoute

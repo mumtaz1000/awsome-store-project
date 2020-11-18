@@ -20,10 +20,7 @@ const UserDropdown: React.FC<Props> = () => {
 
   return (
     <div className='page page--sidebar'>
-      <div
-        className='sidebar sidebar-show'
-        onMouseLeave={() => authDispatch(openUserDropdown(false))}
-      >
+      <div className='sidebar sidebar-show'>
         <div className='sidebar__section sidebar__section--profile'>
           <h3 className='header--center header--sidebar'>
             {authUser?.displayName}
@@ -52,7 +49,12 @@ const UserDropdown: React.FC<Props> = () => {
 
         {/* Close sidebar */}
         <div className='sidebar__section'>
-          <Button className='sidebar__close'>&times;</Button>
+          <Button
+            className='sidebar__close'
+            onClick={() => authDispatch(openUserDropdown(false))}
+          >
+            &times;
+          </Button>
         </div>
       </div>
     </div>

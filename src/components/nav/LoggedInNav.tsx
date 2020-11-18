@@ -30,7 +30,7 @@ const LoggedInNav: React.FC<Props> = () => {
             icon={['fas', 'user-circle']}
             color='white'
             size='2x'
-            onMouseOver={() => authDispatch(openUserDropdown(true))}
+            onClick={() => authDispatch(openUserDropdown(true))}
           />
         </div>
       </div>
