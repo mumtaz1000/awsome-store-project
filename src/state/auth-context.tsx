@@ -125,7 +125,10 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
           })
           .catch(() => authDispatch(setUserRole(null)))
         authDispatch(fetchAuthUser(user))
-      } else authDispatch(fetchAuthUser(null))
+      } else {
+        authDispatch(fetchAuthUser(null))
+        authDispatch(setUserRole(null))
+      }
     })
 
     return () => unsubscribe()
@@ -133,7 +136,7 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
 
   // Listen to user document changed in firestore
   useEffect(() => {
-    if (!authState.authUser) return
+    if (!authState.authUser) return authDispatch(fetchUserInfo(null))
 
     const unsubscribe = usersRef.doc(authState.authUser.uid).onSnapshot({
       next: (doc) => {
