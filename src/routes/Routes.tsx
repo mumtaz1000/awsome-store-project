@@ -8,6 +8,7 @@ import PageNotFound from '../pages/PageNotFound'
 import BuyRoutes from './BuyRoutes'
 import OrderRoutes from './OrderRoutes'
 import AdminRoutes from './AdminRoutes'
+import PrivateRoute from './PrivateRoute'
 
 interface Props {}
 
@@ -15,13 +16,19 @@ const routes: React.FC<Props> = () => {
   return (
     <Switch>
       <Route path='/buy'>
-        <BuyRoutes />
+        <PrivateRoute>
+          <BuyRoutes />
+        </PrivateRoute>
       </Route>
       <Route path='/orders'>
-        <OrderRoutes />
+        <PrivateRoute>
+          <OrderRoutes />
+        </PrivateRoute>
       </Route>
       <Route path='/admin'>
-        <AdminRoutes />
+        <PrivateRoute>
+          <AdminRoutes />
+        </PrivateRoute>
       </Route>
       <Route path='/products/:productId'>
         <ProductDetail />

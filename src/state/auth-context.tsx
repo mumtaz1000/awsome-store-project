@@ -6,7 +6,7 @@ import React, {
   useEffect,
 } from 'react'
 
-import { AuthUser, UserInfo } from '../types'
+import { AuthUser, Role, UserInfo } from '../types'
 import { auth } from '../firebase/config'
 import { usersRef, snapshotToUserInfo } from '../firebase'
 
@@ -16,17 +16,21 @@ type FETCH_AUTH_USER = { type: 'FETCH_AUTH_USER'; payload: AuthUser | null }
 type OPEN_USER_DROPDOWN = { type: 'OPEN_USER_DROPDOWN'; payload: boolean }
 type FETCH_USER_INFO = { type: 'FETCH_USER_INFO'; payload: UserInfo | null }
 type SIGNOUT_REDIRECT = { type: 'SIGNOUT_REDIRECT'; payload: boolean }
+type SET_USER_ROLE = { type: 'SET_USER_ROLE'; payload: Role | null }
+
 type AuthActions =
   | FETCH_AUTH_USER
   | OPEN_USER_DROPDOWN
   | FETCH_USER_INFO
   | SIGNOUT_REDIRECT
+  | SET_USER_ROLE
 
 type AuthState = {
   authUser: AuthUser | null
   isUserDropdownOpen: boolean
   userInfo: UserInfo | null
   signoutRedirect: boolean
+  userRole: Role | null
 }
 
 type AuthDispatch = Dispatch<AuthActions>
@@ -53,6 +57,11 @@ export const fetchUserInfo = (userInfo: UserInfo | null): FETCH_USER_INFO => ({
 export const signoutRedirect = (redirect: boolean): SIGNOUT_REDIRECT => ({
   type: 'SIGNOUT_REDIRECT',
   payload: redirect,
+})
+
+export const setUserRole = (role: Role | null): SET_USER_ROLE => ({
+  type: 'SET_USER_ROLE',
+  payload: role,
 })
 
 // Reducer function
@@ -82,6 +91,12 @@ const authReducer = (state: AuthState, action: AuthActions): AuthState => {
         signoutRedirect: action.payload,
       }
 
+    case 'SET_USER_ROLE':
+      return {
+        ...state,
+        userRole: action.payload,
+      }
+
     default:
       return state
   }
@@ -92,6 +107,7 @@ const initialState: AuthState = {
   isUserDropdownOpen: false,
   userInfo: null,
   signoutRedirect: false,
+  userRole: null,
 }
 
 const AuthContextProvider: React.FC<Props> = ({ children }) => {
@@ -100,8 +116,16 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
   // Listen to auth state change in firebase authentication
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) authDispatch(fetchAuthUser(user))
-      else authDispatch(fetchAuthUser(null))
+      if (user) {
+        user
+          .getIdTokenResult()
+          .then((result) => {
+            const role = result.claims.role as Role
+            authDispatch(setUserRole(role))
+          })
+          .catch(() => authDispatch(setUserRole(null)))
+        authDispatch(fetchAuthUser(user))
+      } else authDispatch(fetchAuthUser(null))
     })
 
     return () => unsubscribe()
