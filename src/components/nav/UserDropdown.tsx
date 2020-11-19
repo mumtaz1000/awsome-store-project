@@ -2,18 +2,20 @@ import React from 'react'
 
 import Button from '../Button'
 import ClientDropdown from './ClientDropdown'
+import AdminDropdown from './AdminDropdown'
 import {
   useAuthContext,
   openUserDropdown,
   signoutRedirect,
 } from '../../state/auth-context'
 import { useAuthenticate } from '../../hooks/useAuthenticate'
+import { isAdmin, isClient } from '../../helpers'
 
 interface Props {}
 
 const UserDropdown: React.FC<Props> = () => {
   const {
-    authState: { authUser },
+    authState: { authUser, userRole },
     authDispatch,
   } = useAuthContext()
   const { signout } = useAuthenticate()
@@ -29,10 +31,10 @@ const UserDropdown: React.FC<Props> = () => {
         </div>
 
         {/* Client user */}
-        <ClientDropdown />
+        {isClient(userRole) && <ClientDropdown />}
 
         {/* Admin user */}
-        {/* <AdminDropdown /> */}
+        {isAdmin(userRole) && <AdminDropdown />}
 
         {/* Logout */}
         <div className='sidebar__section'>
@@ -43,7 +45,7 @@ const UserDropdown: React.FC<Props> = () => {
               authDispatch(signoutRedirect(true))
             }}
           >
-            Sign out
+            SIGN OUT
           </Button>
         </div>
 

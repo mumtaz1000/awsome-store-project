@@ -4,8 +4,8 @@ import { Switch, Route, Redirect } from 'react-router-dom'
 import Orders from '../pages/Orders'
 import OrderDetail from '../pages/OrderDetail'
 import PageNotFound from '../pages/PageNotFound'
-import { isClient } from '../helpers'
 import { Role } from '../types'
+import { isClient } from '../helpers'
 
 interface Props {}
 

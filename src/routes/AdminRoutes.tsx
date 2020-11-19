@@ -14,7 +14,7 @@ interface Props {}
 const AdminRoutes: React.FC<Props> = (props) => {
   const { userRole } = props as { userRole: Role | null }
 
-  if (!isAdmin(userRole)) return <Redirect to='/buy/my-cart' />
+  if (!isAdmin(userRole)) return <Redirect to='buy/my-cart' />
 
   return (
     <Switch>

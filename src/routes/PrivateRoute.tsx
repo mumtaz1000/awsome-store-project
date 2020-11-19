@@ -20,7 +20,7 @@ const PrivateRoute: React.FC<Props> = ({ children }) => {
     }, 2000)
 
     return () => clearTimeout(checkAuth)
-  }, [authUser])
+  }, [])
 
   if (!authChecked && (!authUser || !userRole))
     return <Spinner color='grey' height={50} width={50} />

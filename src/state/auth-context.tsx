@@ -140,7 +140,7 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
 
     const unsubscribe = usersRef.doc(authState.authUser.uid).onSnapshot({
       next: (doc) => {
-        if (!doc.exists) return
+        if (!doc.exists) return authDispatch(fetchUserInfo(null))
 
         const userInfo = snapshotToUserInfo(doc)
         authDispatch(fetchUserInfo(userInfo))
