@@ -5,6 +5,7 @@ import MainNav from './components/nav/MainNav'
 import UserDropdown from './components/nav/UserDropdown'
 import { useAuthContext, openUserDropdown } from './state/auth-context'
 import { useModalContext } from './state/modal-context'
+import ViewContextProvider from './state/view-context'
 
 interface Props {}
 
@@ -24,8 +25,10 @@ const Layout: React.FC<Props> = ({ children }) => {
 
   return (
     <div>
-      <MainNav />
-      {isUserDropdownOpen && <UserDropdown />}
+      <ViewContextProvider>
+        <MainNav />
+        {isUserDropdownOpen && <UserDropdown />}
+      </ViewContextProvider>
 
       <div className='page'>{children}</div>
 

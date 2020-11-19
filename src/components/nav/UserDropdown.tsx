@@ -8,6 +8,7 @@ import {
   openUserDropdown,
   signoutRedirect,
 } from '../../state/auth-context'
+import { useViewContext } from '../../state/view-context'
 import { useAuthenticate } from '../../hooks/useAuthenticate'
 import { isAdmin, isClient } from '../../helpers'
 
@@ -19,6 +20,7 @@ const UserDropdown: React.FC<Props> = () => {
     authDispatch,
   } = useAuthContext()
   const { signout } = useAuthenticate()
+  const { viewMode } = useViewContext()
 
   return (
     <div className='page page--sidebar'>
@@ -30,11 +32,12 @@ const UserDropdown: React.FC<Props> = () => {
           <h3 className='header--center header--sidebar'>{authUser?.email}</h3>
         </div>
 
-        {/* Client user */}
-        {isClient(userRole) && <ClientDropdown />}
-
         {/* Admin user */}
         {isAdmin(userRole) && <AdminDropdown />}
+
+        {/* Client user */}
+        {(isClient(userRole) ||
+          (isAdmin(userRole) && viewMode === 'client')) && <ClientDropdown />}
 
         {/* Logout */}
         <div className='sidebar__section'>
