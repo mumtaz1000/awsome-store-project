@@ -1386,11 +1386,11 @@
 }
 
 /* Manage Products Page */
-.page--manage-product {
-  width: 80%;
+.page--manage-products {
+  width: 100%;
 }
 
-.manage-product__section {
+.manage-products__section {
   width: 100%;
   display: inline-block;
   margin-bottom: 1rem;
@@ -1428,7 +1428,7 @@
 }
 
 @media screen and (max-width: 600px) {
-  .page--manage-product {
+  .page--manage-products {
     width: 90%;
   }
 
