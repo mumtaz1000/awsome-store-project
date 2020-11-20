@@ -1,5 +1,6 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
+import { useHistory } from 'react-router-dom'
 
 import Button from '../Button'
 import Input from '../Input'
@@ -17,6 +18,8 @@ const Signin: React.FC<Props> = () => {
     Omit<SignupData, 'username'>
   >()
 
+  const history = useHistory()
+
   const handleSignin = handleSubmit(async (data) => {
     const response = await signin(data)
 
@@ -25,12 +28,24 @@ const Signin: React.FC<Props> = () => {
 
   return (
     <>
-      <div className='backdrop' onClick={() => setModalType('close')}>
+      <div
+        className='backdrop'
+        onClick={() => {
+          history.replace('/', undefined)
+          setModalType('close')
+        }}
+      >
         {' '}
       </div>
 
       <div className='modal modal--auth-form'>
-        <div className='modal-close' onClick={() => setModalType('close')}>
+        <div
+          className='modal-close'
+          onClick={() => {
+            history.replace('/', undefined)
+            setModalType('close')
+          }}
+        >
           &times;
         </div>
 

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useLocation, useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 
 import ProductItem from '../components/products/ProductItem'
 import { useAuthContext } from '../state/auth-context'
@@ -13,8 +13,9 @@ const Index: React.FC<Props> = () => {
   const {
     authState: { authUser, signoutRedirect },
   } = useAuthContext()
-  const { state } = useLocation<{ from: string }>()
-  const history = useHistory()
+
+  const history = useHistory<{ from: string }>()
+  const { state } = history.location
 
   useEffect(() => {
     // Open the signin modal after the user has been redirected from some private route
@@ -23,6 +24,8 @@ const Index: React.FC<Props> = () => {
         if (!authUser) setModalType('signin')
         else history.push(state.from)
       }
+    } else {
+      history.replace('/', undefined)
     }
   }, [setModalType, state, authUser, history, signoutRedirect])
 

@@ -17,6 +17,7 @@ type OPEN_USER_DROPDOWN = { type: 'OPEN_USER_DROPDOWN'; payload: boolean }
 type FETCH_USER_INFO = { type: 'FETCH_USER_INFO'; payload: UserInfo | null }
 type SIGNOUT_REDIRECT = { type: 'SIGNOUT_REDIRECT'; payload: boolean }
 type SET_USER_ROLE = { type: 'SET_USER_ROLE'; payload: Role | null }
+type FINISH_AUTH_CHECK = { type: 'FINISH_AUTH_CHECK'; payload: boolean }
 
 type AuthActions =
   | FETCH_AUTH_USER
@@ -24,6 +25,7 @@ type AuthActions =
   | FETCH_USER_INFO
   | SIGNOUT_REDIRECT
   | SET_USER_ROLE
+  | FINISH_AUTH_CHECK
 
 type AuthState = {
   authUser: AuthUser | null
@@ -31,6 +33,7 @@ type AuthState = {
   userInfo: UserInfo | null
   signoutRedirect: boolean
   userRole: Role | null
+  authChecked: boolean
 }
 
 type AuthDispatch = Dispatch<AuthActions>
@@ -62,6 +65,11 @@ export const signoutRedirect = (redirect: boolean): SIGNOUT_REDIRECT => ({
 export const setUserRole = (role: Role | null): SET_USER_ROLE => ({
   type: 'SET_USER_ROLE',
   payload: role,
+})
+
+export const finishAuthCheck = (checked: boolean): FINISH_AUTH_CHECK => ({
+  type: 'FINISH_AUTH_CHECK',
+  payload: checked,
 })
 
 // Reducer function
@@ -97,6 +105,12 @@ const authReducer = (state: AuthState, action: AuthActions): AuthState => {
         userRole: action.payload,
       }
 
+    case 'FINISH_AUTH_CHECK':
+      return {
+        ...state,
+        authChecked: action.payload,
+      }
+
     default:
       return state
   }
@@ -108,6 +122,7 @@ const initialState: AuthState = {
   userInfo: null,
   signoutRedirect: false,
   userRole: null,
+  authChecked: false,
 }
 
 const AuthContextProvider: React.FC<Props> = ({ children }) => {
@@ -129,6 +144,8 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
         authDispatch(fetchAuthUser(null))
         authDispatch(setUserRole(null))
       }
+
+      authDispatch(finishAuthCheck(true))
     })
 
     return () => unsubscribe()
