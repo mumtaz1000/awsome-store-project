@@ -1,5 +1,4 @@
 import React from 'react'
-import { useForm, Controller } from 'react-hook-form'
 
 import Input from '../Input'
 import Button from '../Button'
@@ -9,8 +8,6 @@ interface Props {
 }
 
 const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
-  const { control } = useForm<any>()
-
   return (
     <>
       <div className='backdrop' onClick={() => setOpenProductForm(false)}>
@@ -25,48 +22,40 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
         <h2 className='header--center'>Add A New Product</h2>
 
         <form className='form'>
-          {/* Titile */}
-          <Controller
-            name='title'
-            control={control}
-            defaultValue=''
-            render={() => <Input label='Title' placeholder='Product title' />}
-          />
+          {/* Title */}
+          <Input label='Title' name='title' placeholder='Product title' />
 
           {/* Description */}
-          <Controller
-            name='description'
-            control={control}
-            defaultValue=''
-            render={() => (
-              <Input label='Description' placeholder='Product description' />
-            )}
+          <Input
+            label='Description'
+            name='descripton'
+            placeholder='Product descripton'
           />
 
           {/* Price */}
-          <Controller
+          <Input
+            label='Price'
+            type='number'
             name='price'
-            control={control}
-            defaultValue=''
-            render={() => <Input label='Price' placeholder='Product price' />}
+            placeholder='Product price'
           />
 
           {/* Image */}
+          <Input label='Image' name='image' placeholder='Product image' />
 
           {/* Category */}
+          <Input
+            label='Category'
+            name='category'
+            placeholder='Product category'
+          />
 
-          {/* Intentory */}
-          <Controller
+          {/* Inventory */}
+          <Input
+            label='Inventory'
+            type='number'
             name='inventory'
-            control={control}
-            defaultValue=''
-            render={() => (
-              <Input
-                type='number'
-                label='Inventory'
-                placeholder='Product inventory'
-              />
-            )}
+            placeholder='Product inventory'
           />
 
           <Button

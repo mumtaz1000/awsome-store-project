@@ -23,6 +23,7 @@ const ManageProducts: React.FC<Props> = () => {
           <AddAndEditProduct setOpenProductForm={setOpenProductForm} />
         )}
       </div>
+
       <div className='manage-products__section'></div>
     </div>
   )
