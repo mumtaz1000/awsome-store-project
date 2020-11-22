@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import Input from '../Input'
 import Button from '../Button'
 import { Product } from '../../types'
+import { categories } from '../../helpers'
 
 interface Props {
   setOpenProductForm: (open: boolean) => void
@@ -87,11 +88,30 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
           <Input label='Image' name='image' placeholder='Product image' />
 
           {/* Category */}
-          <Input
-            label='Category'
-            name='category'
-            placeholder='Product category'
-          />
+          <div className='form__input-container'>
+            <label htmlFor='Category' className='form__input-label'>
+              Category
+            </label>
+
+            <select
+              name='category'
+              className='input'
+              ref={register({ required: 'Product category is required.' })}
+            >
+              <option style={{ display: 'none' }}></option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+
+            {errors?.category && (
+              <p className='paragraph paragraph--error-small'>
+                {errors.category.message}
+              </p>
+            )}
+          </div>
 
           {/* Inventory */}
           <Input
