@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import { useForm } from 'react-hook-form'
 
 import Input from '../Input'
@@ -14,6 +14,12 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
   const { register, handleSubmit, errors } = useForm<
     Pick<Product, 'title' | 'description' | 'price' | 'category' | 'inventory'>
   >()
+
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  const handleOpenUploadBox = () => {
+    if (inputRef?.current) inputRef.current.click()
+  }
 
   const handleAddProduct = handleSubmit((data) => {
     console.log(data)
@@ -85,7 +91,31 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
           />
 
           {/* Image */}
-          <Input label='Image' name='image' placeholder='Product image' />
+          <div className='form__input-container'>
+            <label htmlFor='Image' className='form__input-label'>
+              Image
+            </label>
+
+            <div className='form__input-file-upload'>
+              <input type='text' className='input' style={{ width: '70%' }} />
+
+              <Button
+                width='30%'
+                height='100%'
+                type='button'
+                style={{ borderRadius: '0', border: '1px solid #282c3499' }}
+                onClick={handleOpenUploadBox}
+              >
+                <span className='paragraph--small'>Select image</span>
+              </Button>
+
+              <input type='file' ref={inputRef} style={{ display: 'none' }} />
+            </div>
+
+            {/* {error && (
+              <p className='paragraph paragraph--error-small'>{error}</p>
+            )} */}
+          </div>
 
           {/* Category */}
           <div className='form__input-container'>
