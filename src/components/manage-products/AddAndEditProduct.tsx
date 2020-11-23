@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, ChangeEvent, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import Input from '../Input'
@@ -6,13 +6,25 @@ import Button from '../Button'
 import { Product } from '../../types'
 import { categories } from '../../helpers'
 
+const fileType = ['image/png', 'image/jpeg', 'image/jpg']
+
 interface Props {
   setOpenProductForm: (open: boolean) => void
 }
 
 const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
+  const [selectedFile, setSelectedFile] = useState<File>()
+
   const { register, handleSubmit, errors } = useForm<
-    Pick<Product, 'title' | 'description' | 'price' | 'category' | 'inventory'>
+    Pick<
+      Product,
+      | 'title'
+      | 'description'
+      | 'price'
+      | 'imageFileName'
+      | 'category'
+      | 'inventory'
+    >
   >()
 
   const inputRef = useRef<HTMLInputElement>(null)
@@ -21,9 +33,26 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
     if (inputRef?.current) inputRef.current.click()
   }
 
+  const handleSelectFile = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+
+    if (!files || !files[0]) return
+
+    const file = files[0]
+
+    if (!fileType.includes(file.type)) {
+      alert('Wrong file format, allow only "png" or "jpeg", or "jpg"')
+      return
+    }
+
+    setSelectedFile(file)
+  }
+
   const handleAddProduct = handleSubmit((data) => {
     console.log(data)
   })
+
+  console.log(selectedFile)
 
   return (
     <>
@@ -97,7 +126,16 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
             </label>
 
             <div className='form__input-file-upload'>
-              <input type='text' className='input' style={{ width: '70%' }} />
+              <input
+                type='text'
+                name='imageFileName'
+                className='input'
+                readOnly
+                style={{ width: '70%', cursor: 'pointer' }}
+                onClick={handleOpenUploadBox}
+                value={selectedFile ? selectedFile.name : ''}
+                ref={register({ required: 'Product image is required.' })}
+              />
 
               <Button
                 width='30%'
@@ -109,12 +147,19 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
                 <span className='paragraph--small'>Select image</span>
               </Button>
 
-              <input type='file' ref={inputRef} style={{ display: 'none' }} />
+              <input
+                type='file'
+                ref={inputRef}
+                style={{ display: 'none' }}
+                onChange={handleSelectFile}
+              />
             </div>
 
-            {/* {error && (
-              <p className='paragraph paragraph--error-small'>{error}</p>
-            )} */}
+            {errors?.imageFileName && !selectedFile && (
+              <p className='paragraph paragraph--error-small'>
+                {errors.imageFileName.message}
+              </p>
+            )}
           </div>
 
           {/* Category */}
@@ -174,3 +219,5 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
 }
 
 export default AddAndEditProduct
+
+// const fileType = ['image/png', 'image/jpeg', 'image/jpg']
