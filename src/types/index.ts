@@ -48,6 +48,11 @@ export type Product = {
   updatedAt?: firebase.firestore.Timestamp
 }
 
+// Product type used to upload a document in firestore
+export type UploadProduct = Omit<Product, 'id' | 'createdAt'> & {
+  createdAt: firebase.firestore.FieldValue
+}
+
 export type AddProductData = Pick<
   Product,
   'title' | 'description' | 'price' | 'imageFileName' | 'category' | 'inventory'

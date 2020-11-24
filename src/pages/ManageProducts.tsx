@@ -2,10 +2,13 @@ import React, { useState } from 'react'
 
 import Button from '../components/Button'
 import AddAndEditProduct from '../components/manage-products/AddAndEditProduct'
+import { UserInfo } from '../types'
 
-interface Props {}
+interface Props {
+  admin: UserInfo | null
+}
 
-const ManageProducts: React.FC<Props> = () => {
+const ManageProducts: React.FC<Props> = ({ admin }) => {
   const [openProductForm, setOpenProductForm] = useState(false)
 
   return (
@@ -20,7 +23,10 @@ const ManageProducts: React.FC<Props> = () => {
         </Button>
 
         {openProductForm && (
-          <AddAndEditProduct setOpenProductForm={setOpenProductForm} />
+          <AddAndEditProduct
+            admin={admin}
+            setOpenProductForm={setOpenProductForm}
+          />
         )}
       </div>
 

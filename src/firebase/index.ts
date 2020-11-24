@@ -4,6 +4,7 @@ import { UserInfo } from '../types'
 import { db, firebase, storageRef } from './config'
 
 export const usersRef = db.collection('users')
+export const productsRef = db.collection('products')
 export const productImagesFolder = 'products'
 
 export const snapshotToUserInfo = (

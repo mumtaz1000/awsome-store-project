@@ -8,7 +8,7 @@ interface Props {}
 
 const PrivateRoute: React.FC<Props> = ({ children }) => {
   const {
-    authState: { authUser, userRole, authChecked },
+    authState: { authUser, userRole, authChecked, userInfo },
   } = useAuthContext()
 
   const location = useLocation()
@@ -31,7 +31,7 @@ const PrivateRoute: React.FC<Props> = ({ children }) => {
   return (
     <>
       {React.Children.map(children as ReactElement, (child) =>
-        React.cloneElement(child, { userRole })
+        React.cloneElement(child, { userRole, userInfo })
       )}
     </>
   )

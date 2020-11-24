@@ -1,15 +1,22 @@
 import { useState } from 'react'
 
 import { useAsyncCall } from './useAsyncCall'
-import { AddProductData } from '../types'
-import { createImageRef } from '../firebase'
+import { AddProductData, UploadProduct } from '../types'
+import { firebase } from '../firebase/config'
+import { createImageRef, productsRef } from '../firebase'
 
 export const useAddProduct = () => {
   const [uploadProgression, setUploadProgression] = useState(0)
+  const [addProductFinished, setAddProductFinished] = useState(false)
 
   const { loading, setLoading, error, setError } = useAsyncCall()
 
-  const addNewProduct = (image: File, data: AddProductData) => {
+  const addNewProduct = (
+    image: File,
+    data: AddProductData,
+    creator: string
+  ) => {
+    const { title, description, price, category, inventory } = data
     setLoading(true)
 
     // 1. Upload an image to firebase storage, get back an image url
@@ -39,6 +46,32 @@ export const useAddProduct = () => {
           .getDownloadURL()
           .then((imageUrl) => {
             // 2. Create a new document in the products collection in firestore, requires product data and the image url
+
+            const newProduct: UploadProduct = {
+              title,
+              description,
+              price: +price,
+              category,
+              inventory: +inventory,
+              imageUrl,
+              imageFileName: image.name,
+              imageRef: imageRef.fullPath,
+              creator,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            }
+
+            productsRef
+              .add(newProduct)
+              .then(() => {
+                setAddProductFinished(true)
+                setLoading(false)
+              })
+              .catch((err) => {
+                const { message } = err as { message: string }
+
+                setError(message)
+                setLoading(false)
+              })
           })
           .catch((err) => {
             const { message } = err as { message: string }
@@ -48,5 +81,13 @@ export const useAddProduct = () => {
           })
       }
     )
+  }
+
+  return {
+    addNewProduct,
+    uploadProgression,
+    addProductFinished,
+    loading,
+    error,
   }
 }

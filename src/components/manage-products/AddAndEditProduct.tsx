@@ -1,23 +1,37 @@
-import React, { useRef, ChangeEvent, useState } from 'react'
+import React, { useRef, ChangeEvent, useState, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
 import Input from '../Input'
 import Button from '../Button'
-import { AddProductData } from '../../types'
+import { useAddProduct } from '../../hooks/useAddProduct'
+import { AddProductData, UserInfo } from '../../types'
 import { categories } from '../../helpers'
 
 const fileType = ['image/png', 'image/jpeg', 'image/jpg']
 
 interface Props {
+  admin: UserInfo | null
   setOpenProductForm: (open: boolean) => void
 }
 
-const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
+const AddAndEditProduct: React.FC<Props> = ({ admin, setOpenProductForm }) => {
   const [selectedFile, setSelectedFile] = useState<File>()
+
+  const {
+    addNewProduct,
+    addProductFinished,
+    uploadProgression,
+    loading,
+    error,
+  } = useAddProduct()
 
   const { register, handleSubmit, errors } = useForm<AddProductData>()
 
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (addProductFinished) setOpenProductForm(false)
+  }, [addProductFinished, setOpenProductForm])
 
   const handleOpenUploadBox = () => {
     if (inputRef?.current) inputRef.current.click()
@@ -39,7 +53,9 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
   }
 
   const handleAddProduct = handleSubmit((data) => {
-    console.log(data)
+    if (!selectedFile || !admin) return
+
+    return addNewProduct(selectedFile, data, admin?.id)
   })
 
   console.log(selectedFile)
@@ -199,6 +215,8 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
             className='btn--orange'
             width='100%'
             style={{ marginTop: '1rem' }}
+            loading={loading}
+            disabled={loading}
           >
             Submit
           </Button>

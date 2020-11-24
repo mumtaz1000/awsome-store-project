@@ -6,20 +6,23 @@ import ManageOrders from '../pages/ManageOrders'
 import ManageOrderDetail from '../pages/ManageOrderDetail'
 import ManageUsers from '../pages/ManageUsers'
 import PageNotFound from '../pages/PageNotFound'
-import { Role } from '../types'
+import { Role, UserInfo } from '../types'
 import { isAdmin } from '../helpers'
 
 interface Props {}
 
 const AdminRoutes: React.FC<Props> = (props) => {
-  const { userRole } = props as { userRole: Role | null }
+  const { userRole, userInfo } = props as {
+    userRole: Role | null
+    userInfo: UserInfo | null
+  }
 
   if (!isAdmin(userRole)) return <Redirect to='buy/my-cart' />
 
   return (
     <Switch>
       <Route path='/admin/manage-products'>
-        <ManageProducts />
+        <ManageProducts admin={userInfo} />
       </Route>
       <Route path='/admin/manage-orders/:id'>
         <ManageOrderDetail />
