@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 
 import Input from '../Input'
 import Button from '../Button'
-import { Product } from '../../types'
+import { AddProductData } from '../../types'
 import { categories } from '../../helpers'
 
 const fileType = ['image/png', 'image/jpeg', 'image/jpg']
@@ -15,17 +15,7 @@ interface Props {
 const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
   const [selectedFile, setSelectedFile] = useState<File>()
 
-  const { register, handleSubmit, errors } = useForm<
-    Pick<
-      Product,
-      | 'title'
-      | 'description'
-      | 'price'
-      | 'imageFileName'
-      | 'category'
-      | 'inventory'
-    >
-  >()
+  const { register, handleSubmit, errors } = useForm<AddProductData>()
 
   const inputRef = useRef<HTMLInputElement>(null)
 

@@ -47,3 +47,8 @@ export type Product = {
   createdAt: firebase.firestore.Timestamp
   updatedAt?: firebase.firestore.Timestamp
 }
+
+export type AddProductData = Pick<
+  Product,
+  'title' | 'description' | 'price' | 'imageFileName' | 'category' | 'inventory'
+>
