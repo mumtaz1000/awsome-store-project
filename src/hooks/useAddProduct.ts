@@ -39,7 +39,6 @@ export const useAddProduct = () => {
       },
       () => {
         // Sucess case
-        setUploadProgression(0)
 
         // Get the image url
         uploadTask.snapshot.ref
@@ -86,6 +85,7 @@ export const useAddProduct = () => {
   return {
     addNewProduct,
     uploadProgression,
+    setUploadProgression,
     addProductFinished,
     loading,
     error,
