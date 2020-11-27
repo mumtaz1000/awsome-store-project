@@ -64,7 +64,7 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     setLoading(true)
 
-    const unsubscribe = productsRef.onSnapshot({
+    const unsubscribe = productsRef.orderBy('createdAt', 'desc').onSnapshot({
       next: (snapshots) => {
         const allProducts: Product[] = []
 

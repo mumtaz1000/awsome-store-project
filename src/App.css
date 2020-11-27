@@ -642,12 +642,16 @@
   }
 
   .header--logo {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
   }
 
   .head__search {
     width: 50%;
     justify-content: center;
+  }
+
+  .search-input {
+    height: 40%;
   }
 
   .btn--search {
