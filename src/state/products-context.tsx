@@ -62,6 +62,8 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
 
   // Fetch the products collection from firestore
   useEffect(() => {
+    setLoading(true)
+
     const unsubscribe = productsRef.onSnapshot({
       next: (snapshots) => {
         const allProducts: Product[] = []
@@ -85,8 +87,12 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
         }) // [All, Clothing, ...]
 
         setProducts(updatedProducts)
+        setLoading(false)
       },
-      error: (err) => setError(err.message),
+      error: (err) => {
+        setError(err.message)
+        setLoading(false)
+      },
     })
 
     return () => unsubscribe()
@@ -120,9 +126,12 @@ export default ProductsContextProvider
 
 export const useProductsContext = () => {
   const productsState = useContext(ProductsStateContext)
-  const  productsDispatch = useContext(ProductsDispatchContext)
+  const productsDispatch = useContext(ProductsDispatchContext)
 
-  if (productsState === undefined || productsDispatch === undefined) throw new Error('useProductsContext must be used within ProductsContextProvider.')
+  if (productsState === undefined || productsDispatch === undefined)
+    throw new Error(
+      'useProductsContext must be used within ProductsContextProvider.'
+    )
 
-  return {productsState, productsDispatch}
+  return { productsState, productsDispatch }
 }

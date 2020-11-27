@@ -2,6 +2,7 @@ import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import { Product } from '../../types'
+import { formatAmount } from '../../helpers'
 
 interface Props {
   product: Product
@@ -14,7 +15,7 @@ const AdminProductItem: React.FC<Props> = ({ product }) => {
       <td className='table-cell'>
         <img src={product.imageUrl} alt={product.title} width='30px' />
       </td>
-      <td className='table-cell'>{product.price}</td>
+      <td className='table-cell'>{formatAmount(product.price)}</td>
       <td className='table-cell table-cell--hide'>
         {product.createdAt && product.createdAt.toDate().toDateString()}
       </td>

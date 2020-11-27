@@ -11,3 +11,6 @@ export const categories: ProductCategory[] = [
   'Watches',
   'Accessories',
 ]
+
+export const formatAmount = (amount: number) =>
+  amount.toLocaleString('en', { minimumFractionDigits: 2 })
