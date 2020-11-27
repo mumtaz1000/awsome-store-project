@@ -8,7 +8,7 @@ import React, {
 
 import { AuthUser, Role, UserInfo } from '../types'
 import { auth } from '../firebase/config'
-import { usersRef, snapshotToUserInfo } from '../firebase'
+import { usersRef, snapshotToDoc } from '../firebase'
 
 interface Props {}
 
@@ -159,7 +159,7 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
       next: (doc) => {
         if (!doc.exists) return authDispatch(fetchUserInfo(null))
 
-        const userInfo = snapshotToUserInfo(doc)
+        const userInfo = snapshotToDoc<UserInfo>(doc)
         authDispatch(fetchUserInfo(userInfo))
       },
       error: () => authDispatch(fetchUserInfo(null)),

@@ -31,6 +31,7 @@ export type UserInfo = {
   updatedAt?: firebase.firestore.Timestamp
 }
 
+export type ProductTab = 'All' | ProductCategory
 export type ProductCategory = 'Clothing' | 'Shoes' | 'Watches' | 'Accessories'
 
 export type Product = {

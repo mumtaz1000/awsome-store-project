@@ -18,6 +18,7 @@ export const useAddProduct = () => {
   ) => {
     const { title, description, price, category, inventory } = data
     setLoading(true)
+    setAddProductFinished(false)
 
     // 1. Upload an image to firebase storage, get back an image url
     const imageRef = createImageRef(image.name)
