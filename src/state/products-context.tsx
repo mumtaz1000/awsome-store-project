@@ -76,7 +76,7 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
 
         const updatedProducts: any = {}
 
-        Object.keys(initialProducts).map((cat) => {
+        Object.keys(initialProducts).forEach((cat) => {
           const category = cat as ProductTab
 
           category === 'All'
@@ -96,6 +96,7 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
     })
 
     return () => unsubscribe()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Fetch the product-counts collection from firestore
