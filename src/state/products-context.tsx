@@ -117,3 +117,12 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
 }
 
 export default ProductsContextProvider
+
+export const useProductsContext = () => {
+  const productsState = useContext(ProductsStateContext)
+  const  productsDispatch = useContext(ProductsDispatchContext)
+
+  if (productsState === undefined || productsDispatch === undefined) throw new Error('useProductsContext must be used within ProductsContextProvider.')
+
+  return {productsState, productsDispatch}
+}
