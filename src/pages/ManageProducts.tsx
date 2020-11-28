@@ -5,11 +5,13 @@ import Button from '../components/Button'
 import Spinner from '../components/Spinner'
 import AddAndEditProduct from '../components/manage-products/AddAndEditProduct'
 import { useProductsContext } from '../state/products-context'
+import { Product } from '../types'
 
 interface Props {}
 
 const ManageProducts: React.FC<Props> = () => {
   const [openProductForm, setOpenProductForm] = useState(false)
+  const [productToEdit, setProductToEdit] = useState<Product | null>(null)
   const {
     productsState: { products, loading },
   } = useProductsContext()
@@ -31,7 +33,10 @@ const ManageProducts: React.FC<Props> = () => {
         </Button>
 
         {openProductForm && (
-          <AddAndEditProduct setOpenProductForm={setOpenProductForm} />
+          <AddAndEditProduct
+            setOpenProductForm={setOpenProductForm}
+            productToEdit={productToEdit}
+          />
         )}
       </div>
 
@@ -50,7 +55,12 @@ const ManageProducts: React.FC<Props> = () => {
 
           <tbody>
             {products.All.map((product) => (
-              <AdminProductItem key={product.id} product={product} />
+              <AdminProductItem
+                key={product.id}
+                product={product}
+                setOpenProductForm={setOpenProductForm}
+                setProductToEdit={setProductToEdit}
+              />
             ))}
           </tbody>
         </table>

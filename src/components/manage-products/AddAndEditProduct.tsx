@@ -5,16 +5,20 @@ import Input from '../Input'
 import Button from '../Button'
 import { useAuthContext } from '../../state/auth-context'
 import { useManageProduct } from '../../hooks/useManageProduct'
-import { AddProductData } from '../../types'
+import { AddProductData, Product } from '../../types'
 import { categories } from '../../helpers'
 
 const fileType = ['image/png', 'image/jpeg', 'image/jpg']
 
 interface Props {
   setOpenProductForm: (open: boolean) => void
+  productToEdit: Product | null
 }
 
-const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
+const AddAndEditProduct: React.FC<Props> = ({
+  setOpenProductForm,
+  productToEdit,
+}) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   const {
@@ -71,6 +75,10 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
     )
   })
 
+  const handleEditProduct = handleSubmit((data) => {
+    console.log(data)
+  })
+
   return (
     <>
       <div className='backdrop' onClick={() => setOpenProductForm(false)}>
@@ -84,12 +92,16 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
 
         <h2 className='header--center'>Add A New Product</h2>
 
-        <form className='form' onSubmit={handleAddProduct}>
+        <form
+          className='form'
+          onSubmit={productToEdit ? handleEditProduct : handleAddProduct}
+        >
           {/* Title */}
           <Input
             label='Title'
             name='title'
             placeholder='Product title'
+            defaultValue={productToEdit ? productToEdit.title : ''}
             ref={register({
               required: 'Titile is requried.',
               minLength: {
@@ -105,6 +117,7 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
             label='Description'
             name='description'
             placeholder='Product description'
+            defaultValue={productToEdit ? productToEdit.description : ''}
             ref={register({
               required: 'Description is requried.',
               minLength: {
@@ -126,6 +139,7 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
             type='number'
             name='price'
             placeholder='Product price'
+            defaultValue={productToEdit ? productToEdit.price : ''}
             ref={register({
               required: 'Price is requried.',
               min: {
@@ -148,7 +162,12 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
                   <input
                     type='text'
                     className='upload-progression'
-                    style={{ width: `${uploadProgression}%` }}
+                    style={{
+                      width: `${uploadProgression}%`,
+                      color: 'white',
+                      textAlign: 'center',
+                    }}
+                    value={`${uploadProgression}%`}
                   />
                 </div>
               ) : (
@@ -159,7 +178,13 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
                   readOnly
                   style={{ width: '70%', cursor: 'pointer' }}
                   onClick={handleOpenUploadBox}
-                  value={selectedFile ? selectedFile.name : ''}
+                  value={
+                    selectedFile
+                      ? selectedFile.name
+                      : productToEdit
+                      ? productToEdit.imageFileName
+                      : ''
+                  }
                   ref={register({ required: 'Product image is required.' })}
                 />
               )}
@@ -198,6 +223,7 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
             <select
               name='category'
               className='input'
+              defaultValue={productToEdit ? productToEdit.category : undefined}
               ref={register({ required: 'Product category is required.' })}
             >
               <option style={{ display: 'none' }}></option>
@@ -221,6 +247,7 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
             type='number'
             name='inventory'
             placeholder='Product inventory'
+            defaultValue={productToEdit ? productToEdit.inventory : ''}
             ref={register({
               required: 'Inventory is requried.',
               min: 0,
