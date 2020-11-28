@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import Input from '../Input'
 import Button from '../Button'
 import { useAuthContext } from '../../state/auth-context'
-import { useAddProduct } from '../../hooks/useAddProduct'
+import { useManageProduct } from '../../hooks/useManageProduct'
 import { AddProductData } from '../../types'
 import { categories } from '../../helpers'
 
@@ -22,13 +22,14 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
   } = useAuthContext()
 
   const {
+    uploadImageToStorage,
     addNewProduct,
     addProductFinished,
     setUploadProgression,
     uploadProgression,
     loading,
     error,
-  } = useAddProduct()
+  } = useManageProduct()
 
   const { register, handleSubmit, errors, reset } = useForm<AddProductData>()
 
@@ -64,7 +65,10 @@ const AddAndEditProduct: React.FC<Props> = ({ setOpenProductForm }) => {
   const handleAddProduct = handleSubmit((data) => {
     if (!selectedFile || !authUser) return
 
-    return addNewProduct(selectedFile, data, authUser?.uid)
+    return uploadImageToStorage(
+      selectedFile,
+      addNewProduct(data, authUser?.uid)
+    )
   })
 
   return (

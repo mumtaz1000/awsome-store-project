@@ -5,20 +5,17 @@ import { AddProductData, UploadProduct } from '../types'
 import { firebase } from '../firebase/config'
 import { createImageRef, productsRef } from '../firebase'
 
-export const useAddProduct = () => {
+export const useManageProduct = () => {
   const [uploadProgression, setUploadProgression] = useState(0)
   const [addProductFinished, setAddProductFinished] = useState(false)
 
   const { loading, setLoading, error, setError } = useAsyncCall()
 
-  const addNewProduct = (
+  const uploadImageToStorage = (
     image: File,
-    data: AddProductData,
-    creator: string
+    cb: (imageUrl: string, imagePath: string) => void
   ) => {
-    const { title, description, price, category, inventory } = data
     setLoading(true)
-    setAddProductFinished(false)
 
     // 1. Upload an image to firebase storage, get back an image url
     const imageRef = createImageRef(image.name)
@@ -45,33 +42,7 @@ export const useAddProduct = () => {
         uploadTask.snapshot.ref
           .getDownloadURL()
           .then((imageUrl) => {
-            // 2. Create a new document in the products collection in firestore, requires product data and the image url
-
-            const newProduct: UploadProduct = {
-              title,
-              description,
-              price: +price,
-              category,
-              inventory: +inventory,
-              imageUrl,
-              imageFileName: image.name,
-              imageRef: imageRef.fullPath,
-              creator,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            }
-
-            productsRef
-              .add(newProduct)
-              .then(() => {
-                setAddProductFinished(true)
-                setLoading(false)
-              })
-              .catch((err) => {
-                const { message } = err as { message: string }
-
-                setError(message)
-                setLoading(false)
-              })
+            cb(imageUrl, imageRef.fullPath)
           })
           .catch((err) => {
             const { message } = err as { message: string }
@@ -83,7 +54,52 @@ export const useAddProduct = () => {
     )
   }
 
+  const addNewProduct = (data: AddProductData, creator: string) => (
+    imageUrl: string,
+    imagePath: string
+  ) => {
+    const {
+      title,
+      description,
+      price,
+      imageFileName,
+      category,
+      inventory,
+    } = data
+    setLoading(true)
+    setAddProductFinished(false)
+
+    // 2. Create a new document in the products collection in firestore, requires product data and the image url
+
+    const newProduct: UploadProduct = {
+      title,
+      description,
+      price: +price,
+      category,
+      inventory: +inventory,
+      imageUrl,
+      imageFileName,
+      imageRef: imagePath,
+      creator,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    }
+
+    productsRef
+      .add(newProduct)
+      .then(() => {
+        setAddProductFinished(true)
+        setLoading(false)
+      })
+      .catch((err) => {
+        const { message } = err as { message: string }
+
+        setError(message)
+        setLoading(false)
+      })
+  }
+
   return {
+    uploadImageToStorage,
     addNewProduct,
     uploadProgression,
     setUploadProgression,
