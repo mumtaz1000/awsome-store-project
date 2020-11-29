@@ -36,6 +36,7 @@ const ManageProducts: React.FC<Props> = () => {
           <AddAndEditProduct
             setOpenProductForm={setOpenProductForm}
             productToEdit={productToEdit}
+            setProductToEdit={setProductToEdit}
           />
         )}
       </div>

@@ -6,6 +6,7 @@ import Button from '../Button'
 import { useAuthContext } from '../../state/auth-context'
 import { useManageProduct } from '../../hooks/useManageProduct'
 import { AddProductData, Product } from '../../types'
+import { storageRef } from '../../firebase/config'
 import { categories } from '../../helpers'
 
 const fileType = ['image/png', 'image/jpeg', 'image/jpg']
@@ -13,11 +14,13 @@ const fileType = ['image/png', 'image/jpeg', 'image/jpg']
 interface Props {
   setOpenProductForm: (open: boolean) => void
   productToEdit: Product | null
+  setProductToEdit: (product: Product | null) => void
 }
 
 const AddAndEditProduct: React.FC<Props> = ({
   setOpenProductForm,
   productToEdit,
+  setProductToEdit,
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
@@ -28,9 +31,11 @@ const AddAndEditProduct: React.FC<Props> = ({
   const {
     uploadImageToStorage,
     addNewProduct,
+    editProduct,
     addProductFinished,
     setUploadProgression,
     uploadProgression,
+    editProductFinished,
     loading,
     error,
   } = useManageProduct()
@@ -46,6 +51,23 @@ const AddAndEditProduct: React.FC<Props> = ({
       setUploadProgression(0)
     }
   }, [addProductFinished, reset, setUploadProgression, setSelectedFile])
+
+  useEffect(() => {
+    if (editProductFinished) {
+      reset()
+      setSelectedFile(null)
+      setUploadProgression(0)
+      setProductToEdit(null)
+      setOpenProductForm(false)
+    }
+  }, [
+    editProductFinished,
+    reset,
+    setUploadProgression,
+    setSelectedFile,
+    setProductToEdit,
+    setOpenProductForm,
+  ])
 
   const handleOpenUploadBox = () => {
     if (inputRef?.current) inputRef.current.click()
@@ -75,8 +97,53 @@ const AddAndEditProduct: React.FC<Props> = ({
     )
   })
 
-  const handleEditProduct = handleSubmit((data) => {
-    console.log(data)
+  const handleEditProduct = handleSubmit(async (data) => {
+    if (!productToEdit || !authUser) return
+
+    const {
+      title,
+      description,
+      price,
+      imageFileName,
+      category,
+      inventory,
+      imageRef,
+      imageUrl,
+    } = productToEdit
+
+    // Check if the product data has been changed
+    const isNotEdited =
+      title === data.title &&
+      description === data.description &&
+      +price === +data.price &&
+      imageFileName === data.imageFileName &&
+      category === data.category &&
+      +inventory === +data.inventory
+
+    // 1. Nothing changed
+    if (isNotEdited) return
+
+    // 2. Something changed
+    if (imageFileName !== data.imageFileName) {
+      // 2.1 If the iamge changed
+      if (!selectedFile) return
+
+      // Delete the old image
+      const oldImageRef = storageRef.child(imageRef)
+      await oldImageRef.delete()
+
+      return uploadImageToStorage(
+        selectedFile,
+        editProduct(productToEdit.id, data, authUser.uid)
+      )
+    } else {
+      // The image has not been changed
+      return editProduct(
+        productToEdit.id,
+        data,
+        authUser.uid
+      )(imageUrl, imageRef)
+    }
   })
 
   return (
@@ -168,6 +235,7 @@ const AddAndEditProduct: React.FC<Props> = ({
                       textAlign: 'center',
                     }}
                     value={`${uploadProgression}%`}
+                    readOnly
                   />
                 </div>
               ) : (
@@ -277,5 +345,3 @@ const AddAndEditProduct: React.FC<Props> = ({
 }
 
 export default AddAndEditProduct
-
-// const fileType = ['image/png', 'image/jpeg', 'image/jpg']

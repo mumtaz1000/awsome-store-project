@@ -8,6 +8,7 @@ import { createImageRef, productsRef } from '../firebase'
 export const useManageProduct = () => {
   const [uploadProgression, setUploadProgression] = useState(0)
   const [addProductFinished, setAddProductFinished] = useState(false)
+  const [editProductFinished, setEditProductFinished] = useState(false)
 
   const { loading, setLoading, error, setError } = useAsyncCall()
 
@@ -98,12 +99,60 @@ export const useManageProduct = () => {
       })
   }
 
+  const editProduct = (
+    productId: string,
+    data: AddProductData,
+    creator: string
+  ) => (imageUrl: string, imagePath: string) => {
+    const {
+      title,
+      description,
+      price,
+      imageFileName,
+      category,
+      inventory,
+    } = data
+    setLoading(true)
+    setEditProductFinished(false)
+
+    // 2. Update the document in the products collection in firestore, requires an editted product data and the image url (in case the product image changed.)
+
+    const edittedProduct: UploadProduct = {
+      title,
+      description,
+      price: +price,
+      category,
+      inventory: +inventory,
+      imageUrl,
+      imageFileName,
+      imageRef: imagePath,
+      creator,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    }
+
+    productsRef
+      .doc(productId)
+      .set(edittedProduct, { merge: true })
+      .then(() => {
+        setEditProductFinished(true)
+        setLoading(false)
+      })
+      .catch((err) => {
+        const { message } = err as { message: string }
+
+        setError(message)
+        setLoading(false)
+      })
+  }
+
   return {
     uploadImageToStorage,
     addNewProduct,
+    editProduct,
     uploadProgression,
     setUploadProgression,
     addProductFinished,
+    editProductFinished,
     loading,
     error,
   }
