@@ -4,6 +4,9 @@ import * as admin from 'firebase-admin'
 admin.initializeApp()
 
 const env = functions.config()
+const productsCollection = 'products'
+const productCountsCollection = 'product-counts'
+const productCountsDocument = 'counts'
 
 // product-counts --> counts --> { All: 10, Clothing: 3, Shoes: 2, Watched: 2, Accessories: 3 }
 
@@ -61,7 +64,7 @@ export const onSignup = functions.https.onCall(async (data, context) => {
 })
 
 export const onProductCreated = functions.firestore
-  .document('products/{productId}')
+  .document(`${productsCollection}/{productId}`)
   .onCreate(async (snapshot, context) => {
     const product = snapshot.data() as Product
 
@@ -70,8 +73,8 @@ export const onProductCreated = functions.firestore
     // Query the product-counts collection
     const countsData = await admin
       .firestore()
-      .collection('product-counts')
-      .doc('counts')
+      .collection(productCountsCollection)
+      .doc(productCountsDocument)
       .get()
 
     if (!countsData.exists) {
@@ -107,7 +110,39 @@ export const onProductCreated = functions.firestore
     // Update the counts document in the product-counts collection
     return admin
       .firestore()
-      .collection('product-counts')
-      .doc('counts')
+      .collection(productCountsCollection)
+      .doc(productCountsDocument)
+      .set(counts)
+  })
+
+export const onProductUpdated = functions.firestore
+  .document(`${productsCollection}/{productId}`)
+  .onUpdate(async (snapshot, context) => {
+    const beforeProd = snapshot.before.data() as Product
+    const afterProd = snapshot.after.data() as Product
+
+    // Check if the category has been changed
+    // A. The category isn't changed
+    if (beforeProd.category === afterProd.category) return
+
+    // B. The category is changed
+    const countsData = await admin
+      .firestore()
+      .collection(productCountsCollection)
+      .doc(productCountsDocument)
+      .get()
+
+    if (!countsData.exists) return
+
+    const counts = countsData.data() as Counts
+
+    // Update the counts object
+    counts[beforeProd.category] = counts[beforeProd.category] - 1
+    counts[afterProd.category] = counts[afterProd.category] + 1
+
+    return admin
+      .firestore()
+      .collection(productCountsCollection)
+      .doc(productCountsDocument)
       .set(counts)
   })

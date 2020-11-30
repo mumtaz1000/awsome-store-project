@@ -148,16 +148,30 @@ const AddAndEditProduct: React.FC<Props> = ({
 
   return (
     <>
-      <div className='backdrop' onClick={() => setOpenProductForm(false)}>
+      <div
+        className='backdrop'
+        onClick={() => {
+          setProductToEdit(null)
+          setOpenProductForm(false)
+        }}
+      >
         {' '}
       </div>
 
       <div className='modal modal--add-product'>
-        <div className='modal-close' onClick={() => setOpenProductForm(false)}>
+        <div
+          className='modal-close'
+          onClick={() => {
+            setProductToEdit(null)
+            setOpenProductForm(false)
+          }}
+        >
           &times;
         </div>
 
-        <h2 className='header--center'>Add A New Product</h2>
+        <h2 className='header--center'>
+          {productToEdit ? 'Edit A Product' : 'Add A New Product'}
+        </h2>
 
         <form
           className='form'
