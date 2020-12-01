@@ -4,7 +4,10 @@ import AdminProductItem from '../components/manage-products/AdminProductItem'
 import Button from '../components/Button'
 import Spinner from '../components/Spinner'
 import AddAndEditProduct from '../components/manage-products/AddAndEditProduct'
+import AlertDialog from '../components/dialogs/AlertDialog'
 import { useProductsContext } from '../state/products-context'
+import { useManageProduct } from '../hooks/useManageProduct'
+import { useDialog } from '../hooks/useDialog'
 import { Product } from '../types'
 
 interface Props {}
@@ -12,9 +15,16 @@ interface Props {}
 const ManageProducts: React.FC<Props> = () => {
   const [openProductForm, setOpenProductForm] = useState(false)
   const [productToEdit, setProductToEdit] = useState<Product | null>(null)
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null)
   const {
-    productsState: { products, loading },
+    productsState: { products, loading, error },
   } = useProductsContext()
+  const { openDialog, setOpenDialog } = useDialog()
+  const {
+    deleteProduct,
+    loading: deleteProdLoading,
+    error: deleteProdError,
+  } = useManageProduct()
 
   if (loading) return <Spinner color='grey' width={50} height={50} />
 
@@ -61,12 +71,38 @@ const ManageProducts: React.FC<Props> = () => {
                   product={product}
                   setOpenProductForm={setOpenProductForm}
                   setProductToEdit={setProductToEdit}
+                  setOpenDialog={setOpenDialog}
+                  setProductToDelete={setProductToDelete}
                 />
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {error && <p className='paragraph paragraph--error'>{error}</p>}
+
+      {openDialog && (
+        <AlertDialog
+          header='Please confirm'
+          message={`Are you sure you want to delete this ${
+            productToDelete ? productToDelete?.title : 'item'
+          }?`}
+          onCancel={() => {
+            setProductToDelete(null)
+            setOpenDialog(false)
+          }}
+          onConfirm={async () => {
+            if (productToDelete) {
+              const finished = await deleteProduct(productToDelete)
+
+              if (finished) setOpenDialog(false)
+            }
+          }}
+          loading={deleteProdLoading}
+          error={deleteProdError}
+        />
+      )}
     </div>
   )
 }
