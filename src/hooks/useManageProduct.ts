@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
 import { useAsyncCall } from './useAsyncCall'
-import { AddProductData, UploadProduct } from '../types'
-import { firebase } from '../firebase/config'
+import { AddProductData, Product, UploadProduct } from '../types'
+import { firebase, storageRef } from '../firebase/config'
 import { createImageRef, productsRef } from '../firebase'
 
 export const useManageProduct = () => {
@@ -145,10 +145,37 @@ export const useManageProduct = () => {
       })
   }
 
+  const deleteProduct = async (product: Product) => {
+    try {
+      setLoading(true)
+
+      // 1. Delete the product's image from storage
+      const imageRef = storageRef.child(product.imageRef)
+      await imageRef.delete()
+
+      // 2. Delete the document from the products collection in firestore
+      await productsRef.doc(product.id).delete()
+
+      // 3. TODO: Delete the cart item if that cart item is the deleted product
+
+      setLoading(false)
+
+      return true
+    } catch (err) {
+      const { message } = err as { message: string }
+
+      setError(message)
+      setLoading(false)
+
+      return false
+    }
+  }
+
   return {
     uploadImageToStorage,
     addNewProduct,
     editProduct,
+    deleteProduct,
     uploadProgression,
     setUploadProgression,
     addProductFinished,

@@ -146,3 +146,30 @@ export const onProductUpdated = functions.firestore
       .doc(productCountsDocument)
       .set(counts)
   })
+
+export const onProductDeleted = functions.firestore
+  .document(`${productsCollection}/{productId}`)
+  .onDelete(async (snapshot, context) => {
+    const product = snapshot.data() as Product
+
+    // Query the product-counts/counts from firestore
+    const countsData = await admin
+      .firestore()
+      .collection(productCountsCollection)
+      .doc(productCountsDocument)
+      .get()
+
+    if (!countsData.exists) return
+
+    const counts = countsData.data() as Counts
+
+    // Update the counts object
+    counts.All = counts.All - 1
+    counts[product.category] = counts[product.category] - 1
+
+    return admin
+      .firestore()
+      .collection(productCountsCollection)
+      .doc(productCountsDocument)
+      .set(counts)
+  })
