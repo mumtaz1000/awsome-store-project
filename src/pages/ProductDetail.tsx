@@ -5,8 +5,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Button from '../components/Button'
 import Spinner from '../components/Spinner'
 import PageNotFound from './PageNotFound'
+import { useAuthContext } from '../state/auth-context'
+import { useModalContext } from '../state/modal-context'
 import { useProductsContext } from '../state/products-context'
 import { Product } from '../types'
+import { formatAmount, isAdmin, isClient } from '../helpers'
 
 interface Props {}
 
@@ -14,6 +17,10 @@ const ProductDetail: React.FC<Props> = () => {
   const {
     productsState: { products, loading },
   } = useProductsContext()
+  const {
+    authState: { authUser, userRole },
+  } = useAuthContext()
+  const { setModalType } = useModalContext()
 
   const params = useParams() as { productId: string }
 
@@ -49,13 +56,22 @@ const ProductDetail: React.FC<Props> = () => {
           <p className='paragraph'>
             Price:{' '}
             <span className='paragraph--orange'>
-              ${product.price.toFixed(2)}
+              ${formatAmount(product.price)}
             </span>
           </p>
         </div>
         <div className='product-detail__sub-section product-detail__sub-section--stock'>
           <p className='paragraph'>
-            Availability: <span className='paragraph--success'>In stock</span>
+            Availability:{' '}
+            <span
+              className={`paragraph--success ${
+                product.inventory === 0 ? 'paragraph--error' : undefined
+              }`}
+            >
+              {product.inventory === 0
+                ? 'Out of stock'
+                : `In stock (${product.inventory} pcs)`}
+            </span>
           </p>
         </div>
         <div className='product-detail__sub-section quantity-control'>
@@ -70,7 +86,22 @@ const ProductDetail: React.FC<Props> = () => {
           </div>
         </div>
 
-        <Button>Add to Cart</Button>
+        <Button
+          disabled={product.inventory === 0}
+          onClick={() => {
+            if (!authUser) {
+              setModalType('signin')
+              return
+            } else if (authUser && isAdmin(userRole)) {
+              alert('You are an admin user, you cannot proceed "Add To Cart".')
+              return
+            } else if (authUser && isClient(userRole)) {
+              // Add The Product To Cart
+            }
+          }}
+        >
+          Add to Cart
+        </Button>
       </div>
     </div>
   )

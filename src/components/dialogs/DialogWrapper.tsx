@@ -2,22 +2,22 @@ import React from 'react'
 
 interface Props {
   header: string
-  onOpen?: (open: boolean) => void
+  onClose?: (open: boolean) => void
 }
 
-const DialogWrapper: React.FC<Props> = ({ children, header, onOpen }) => {
+const DialogWrapper: React.FC<Props> = ({ children, header, onClose }) => {
   return (
     <div>
       <div
         className='backdrop'
-        onClick={onOpen ? () => onOpen(false) : undefined}
+        onClick={onClose ? () => onClose(false) : undefined}
       >
         {' '}
       </div>
 
       <div className='modal modal--dialog'>
-        {onOpen && (
-          <div className='modal-close' onClick={() => onOpen(false)}>
+        {onClose && (
+          <div className='modal-close' onClick={() => onClose(false)}>
             &times;
           </div>
         )}
