@@ -21,6 +21,7 @@ const ProductDetail: React.FC<Props> = () => {
     authState: { authUser, userRole },
   } = useAuthContext()
   const { setModalType } = useModalContext()
+  const [quantity, setQuantity] = useState(1)
 
   const params = useParams() as { productId: string }
 
@@ -68,23 +69,51 @@ const ProductDetail: React.FC<Props> = () => {
                 product.inventory === 0 ? 'paragraph--error' : undefined
               }`}
             >
-              {product.inventory === 0
-                ? 'Out of stock'
-                : `In stock (${product.inventory} pcs)`}
+              {product.inventory} pcs
             </span>
           </p>
         </div>
-        <div className='product-detail__sub-section quantity-control'>
-          <div className='qty-action'>
-            <FontAwesomeIcon icon={['fas', 'minus']} size='xs' color='grey' />
+
+        {product.inventory === 0 ? (
+          <p className='paragraph--error'>Out of stock</p>
+        ) : (
+          <div className='product-detail__sub-section quantity-control'>
+            <div
+              className='qty-action'
+              style={{ cursor: quantity === 1 ? 'not-allowed' : undefined }}
+              onClick={() =>
+                setQuantity((prev) => {
+                  if (prev < 2) return prev
+
+                  return prev - 1
+                })
+              }
+            >
+              <FontAwesomeIcon icon={['fas', 'minus']} size='xs' color='grey' />
+            </div>
+
+            <div className='qty-action qty-action--qty'>
+              <p className='paragraph'>{quantity}</p>
+            </div>
+
+            <div
+              className='qty-action'
+              style={{
+                cursor:
+                  quantity === product.inventory ? 'not-allowed' : undefined,
+              }}
+              onClick={() =>
+                setQuantity((prev) => {
+                  if (prev === product.inventory) return prev
+
+                  return prev + 1
+                })
+              }
+            >
+              <FontAwesomeIcon icon={['fas', 'plus']} size='xs' color='grey' />
+            </div>
           </div>
-          <div className='qty-action qty-action--qty'>
-            <p className='paragraph'>1</p>
-          </div>
-          <div className='qty-action'>
-            <FontAwesomeIcon icon={['fas', 'plus']} size='xs' color='grey' />
-          </div>
-        </div>
+        )}
 
         <Button
           disabled={product.inventory === 0}
