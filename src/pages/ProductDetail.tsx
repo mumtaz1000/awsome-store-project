@@ -125,7 +125,7 @@ const ProductDetail: React.FC<Props> = () => {
         )}
 
         <Button
-          disabled={product.inventory === 0}
+          disabled={product.inventory === 0 || addToCartLoading}
           loading={addToCartLoading}
           onClick={async () => {
             if (!authUser) {
@@ -139,7 +139,8 @@ const ProductDetail: React.FC<Props> = () => {
               const finished = await addToCart(
                 product.id,
                 quantity,
-                authUser.uid
+                authUser.uid,
+                product.inventory
               )
 
               if (finished) setQuantity(1)

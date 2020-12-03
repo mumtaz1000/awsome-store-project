@@ -9,7 +9,8 @@ export const useManageCart = () => {
   const addToCart = async (
     productId: string,
     quantity: number,
-    userId: string
+    userId: string,
+    inventory: number
   ) => {
     try {
       setLoading(true)
@@ -33,10 +34,11 @@ export const useManageCart = () => {
         const currentCartItem = snapshot.data() as UploadCartItem
 
         cartItem = {
-          product: productId,
-          quantity: currentCartItem.quantity + quantity,
-          user: userId,
-          createdAt: currentCartItem.createdAt,
+          ...currentCartItem,
+          quantity:
+            currentCartItem.quantity + quantity > inventory
+              ? inventory
+              : currentCartItem.quantity + quantity,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         }
       }
