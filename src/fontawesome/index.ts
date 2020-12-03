@@ -6,6 +6,7 @@ import {
   faUserCircle,
   faEdit,
   faTrashAlt,
+  faCheckCircle,
 } from '@fortawesome/free-solid-svg-icons'
 import { faFacebookF, faGoogle } from '@fortawesome/free-brands-svg-icons'
 
@@ -17,5 +18,6 @@ library.add(
   faFacebookF,
   faGoogle,
   faEdit,
-  faTrashAlt
+  faTrashAlt,
+  faCheckCircle
 )
