@@ -8,6 +8,7 @@ import PageNotFound from './PageNotFound'
 import { useAuthContext } from '../state/auth-context'
 import { useModalContext } from '../state/modal-context'
 import { useProductsContext } from '../state/products-context'
+import { useManageCart } from '../hooks/useManageCart'
 import { Product } from '../types'
 import { formatAmount, isAdmin, isClient } from '../helpers'
 
@@ -15,12 +16,18 @@ interface Props {}
 
 const ProductDetail: React.FC<Props> = () => {
   const {
-    productsState: { products, loading },
+    productsState: { products, loading, error },
   } = useProductsContext()
   const {
     authState: { authUser, userRole },
   } = useAuthContext()
   const { setModalType } = useModalContext()
+  const {
+    addToCart,
+    loading: addToCartLoading,
+    error: addToCartError,
+  } = useManageCart()
+
   const [quantity, setQuantity] = useState(1)
 
   const params = useParams() as { productId: string }
@@ -35,6 +42,8 @@ const ProductDetail: React.FC<Props> = () => {
   }, [params, products.All])
 
   if (loading) return <Spinner color='grey' width={50} height={50} />
+
+  if (!loading && error) return <h2 className='header'>{error}</h2>
 
   if (!product) return <PageNotFound />
 
@@ -117,7 +126,8 @@ const ProductDetail: React.FC<Props> = () => {
 
         <Button
           disabled={product.inventory === 0}
-          onClick={() => {
+          loading={addToCartLoading}
+          onClick={async () => {
             if (!authUser) {
               setModalType('signin')
               return
@@ -126,11 +136,20 @@ const ProductDetail: React.FC<Props> = () => {
               return
             } else if (authUser && isClient(userRole)) {
               // Add The Product To Cart
+              const finished = await addToCart(
+                product.id,
+                quantity,
+                authUser.uid
+              )
+
+              if (finished) setQuantity(1)
             }
           }}
         >
           Add to Cart
         </Button>
+
+        {addToCartError && <p className='paragraph--error'>{addToCartError}</p>}
       </div>
     </div>
   )

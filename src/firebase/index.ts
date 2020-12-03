@@ -6,6 +6,7 @@ import { db, firebase, storageRef } from './config'
 export const usersRef = db.collection('users')
 export const productsRef = db.collection('products')
 export const productCountsRef = db.collection('product-counts')
+export const cartRef = db.collection('cart')
 export const productImagesFolder = 'products'
 
 export const snapshotToDoc = <T extends UserInfo | Product>(

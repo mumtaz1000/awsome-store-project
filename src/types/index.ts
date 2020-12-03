@@ -59,3 +59,18 @@ export type AddProductData = Pick<
   Product,
   'title' | 'description' | 'price' | 'imageFileName' | 'category' | 'inventory'
 >
+
+export type CartItem = {
+  id: string
+  product: Product
+  quantity: number
+  user: string
+  createdAt: firebase.firestore.Timestamp
+  updatedAt?: firebase.firestore.Timestamp
+}
+
+export type UploadCartItem = Pick<CartItem, 'quantity' | 'user'> & {
+  product: string
+  createdAt: firebase.firestore.FieldValue
+  updatedAt?: firebase.firestore.FieldValue
+}
