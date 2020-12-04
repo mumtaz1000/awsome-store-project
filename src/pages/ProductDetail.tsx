@@ -9,6 +9,7 @@ import PageNotFound from './PageNotFound'
 import { useAuthContext } from '../state/auth-context'
 import { useModalContext } from '../state/modal-context'
 import { useProductsContext } from '../state/products-context'
+import { useCartContext } from '../state/cart-context'
 import { useManageCart } from '../hooks/useManageCart'
 import { useDialog } from '../hooks/useDialog'
 import { Product } from '../types'
@@ -30,6 +31,7 @@ const ProductDetail: React.FC<Props> = () => {
     error: addToCartError,
   } = useManageCart()
   const { openDialog, setOpenDialog } = useDialog()
+  const { cart } = useCartContext()
 
   const [quantity, setQuantity] = useState(1)
   const [addedCartItem, setAddedCartItem] = useState<{
@@ -143,6 +145,19 @@ const ProductDetail: React.FC<Props> = () => {
               alert('You are an admin user, you cannot proceed "Add To Cart".')
               return
             } else if (authUser && isClient(userRole)) {
+              // Check if this item is already in the existing cart, and if it is, check it's cart quantity vs it's inventory
+
+              if (cart && cart.length > 0) {
+                const foundItem = cart.find(
+                  (item) => item.product === product.id
+                )
+
+                if (foundItem && foundItem.quantity >= product.inventory) {
+                  alert('Cannot add to cart, not enough inventory.')
+                  return
+                }
+              }
+
               // Add The Product To Cart
               const finished = await addToCart(
                 product.id,
