@@ -976,7 +976,7 @@
   align-items: center;
 }
 
-.cart-item__update-action {
+.quantity-update-action {
   width: 50%;
   display: flex;
   justify-content: space-around;

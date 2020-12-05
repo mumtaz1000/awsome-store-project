@@ -1,14 +1,15 @@
 import React from 'react'
 import { useHistory } from 'react-router-dom'
 
+import MyCartItem from '../components/cart/MyCartItem'
 import Spinner from '../components/Spinner'
+import Button from '../components/Button'
 import { useCartContext } from '../state/cart-context'
 import {
   calculateCartQuantity,
   calculateCartAmount,
   formatAmount,
 } from '../helpers'
-import Button from '../components/Button'
 
 interface Props {}
 
@@ -17,7 +18,7 @@ const MyCart: React.FC<Props> = () => {
 
   const history = useHistory()
 
-  if (!cart) return <Spinner color='grey' height={25} width={25} />
+  if (!cart) return <Spinner color='grey' height={50} width={50} />
 
   if (cart && cart.length === 0)
     return (
@@ -39,7 +40,7 @@ const MyCart: React.FC<Props> = () => {
 
         <div className='cart-detail'>
           {cart.map((item) => (
-            <p key={item.id}>{item.quantity}</p>
+            <MyCartItem key={item.id} cartItem={item} />
           ))}
         </div>
       </div>
