@@ -8,9 +8,15 @@ import { formatAmount } from '../../helpers'
 
 interface Props {
   cartItem: CartItem
+  setOpenDialog: (open: boolean) => void
+  setCartItemToDelete: (item: CartItem | null) => void
 }
 
-const MyCartItem: React.FC<Props> = ({ cartItem }) => {
+const MyCartItem: React.FC<Props> = ({
+  cartItem,
+  setOpenDialog,
+  setCartItemToDelete,
+}) => {
   const {
     quantity,
     user,
@@ -113,6 +119,10 @@ const MyCartItem: React.FC<Props> = ({ cartItem }) => {
         <p
           className='paragraph paragraph--error paragraph--focus'
           style={{ cursor: 'pointer' }}
+          onClick={() => {
+            setCartItemToDelete(cartItem)
+            setOpenDialog(true)
+          }}
         >
           Remove
         </p>

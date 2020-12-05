@@ -57,5 +57,28 @@ export const useManageCart = () => {
     }
   }
 
-  return { addToCart, loading, error }
+  const removeCartItem = async (productId: string, userId: string) => {
+    try {
+      setLoading(true)
+
+      const cartItemRef = cartRef.doc(`${userId}-${productId}`)
+      const snapshot = await cartItemRef.get()
+
+      if (!snapshot.exists) return
+
+      await cartItemRef.delete()
+      setLoading(false)
+
+      return true
+    } catch (err) {
+      const { message } = err as { message: string }
+
+      setError(message)
+      setLoading(false)
+
+      return false
+    }
+  }
+
+  return { addToCart, removeCartItem, loading, error }
 }

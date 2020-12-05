@@ -221,6 +221,7 @@
 
 /* Dialog */
 .modal--dialog {
+  position: fixed;
   width: 40%;
   padding: 1rem 2rem;
 }

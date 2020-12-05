@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
 import MyCartItem from '../components/cart/MyCartItem'
 import Spinner from '../components/Spinner'
 import Button from '../components/Button'
+import AlertDialog from '../components/dialogs/AlertDialog'
 import { useCartContext } from '../state/cart-context'
+import { useDialog } from '../hooks/useDialog'
+import { useManageCart } from '../hooks/useManageCart'
+import { CartItem } from '../types'
 import {
   calculateCartQuantity,
   calculateCartAmount,
@@ -15,6 +19,12 @@ interface Props {}
 
 const MyCart: React.FC<Props> = () => {
   const { cart } = useCartContext()
+  const { openDialog, setOpenDialog } = useDialog()
+  const { removeCartItem, loading, error } = useManageCart()
+
+  const [cartItemToDelete, setCartItemToDelete] = useState<CartItem | null>(
+    null
+  )
 
   const history = useHistory()
 
@@ -40,7 +50,12 @@ const MyCart: React.FC<Props> = () => {
 
         <div className='cart-detail'>
           {cart.map((item) => (
-            <MyCartItem key={item.id} cartItem={item} />
+            <MyCartItem
+              key={item.id}
+              cartItem={item}
+              setOpenDialog={setOpenDialog}
+              setCartItemToDelete={setCartItemToDelete}
+            />
           ))}
         </div>
       </div>
@@ -73,6 +88,32 @@ const MyCart: React.FC<Props> = () => {
           Proceed to checkout
         </Button>
       </div>
+
+      {openDialog && cartItemToDelete && (
+        <AlertDialog
+          header='Please confirm'
+          message={`Are you sure you want to delete the "${cartItemToDelete.item.title}" from your cart?`}
+          onCancel={() => {
+            setCartItemToDelete(null)
+            setOpenDialog(false)
+          }}
+          onConfirm={async () => {
+            if (cartItemToDelete) {
+              const finished = await removeCartItem(
+                cartItemToDelete.item.id,
+                cartItemToDelete.user
+              )
+
+              if (finished) {
+                setCartItemToDelete(null)
+                setOpenDialog(false)
+              }
+            }
+          }}
+          loading={loading}
+          error={error}
+        />
+      )}
     </div>
   )
 }
