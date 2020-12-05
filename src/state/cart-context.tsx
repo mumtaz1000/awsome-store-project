@@ -8,6 +8,7 @@ import React, {
 } from 'react'
 
 import { useAuthContext } from './auth-context'
+import { useProductsContext } from './products-context'
 import { useAsyncCall } from '../hooks/useAsyncCall'
 import { CartItem } from '../types'
 import { cartRef, snapshotToDoc } from '../firebase'
@@ -34,6 +35,11 @@ const CartContextProvider: React.FC<Props> = ({ children }) => {
     authState: { authUser },
   } = useAuthContext()
   const { loading, setLoading, error, setError } = useAsyncCall()
+  const {
+    productsState: {
+      products: { All },
+    },
+  } = useProductsContext()
 
   useEffect(() => {
     setLoading(true)
@@ -45,6 +51,8 @@ const CartContextProvider: React.FC<Props> = ({ children }) => {
       return
     }
 
+    if (All.length === 0) return
+
     // User is authenticated
     const unsubscribe = cartRef
       .where('user', '==', authUser.uid)
@@ -55,8 +63,11 @@ const CartContextProvider: React.FC<Props> = ({ children }) => {
 
           snapshots.forEach((snapshot) => {
             const cartItem = snapshotToDoc<CartItem>(snapshot)
+            const product = All.find((prod) => prod.id === cartItem.product)
 
-            cart.push(cartItem)
+            if (!product) return
+
+            cart.push({ ...cartItem, item: product })
           })
 
           setCart(cart)
@@ -67,8 +78,8 @@ const CartContextProvider: React.FC<Props> = ({ children }) => {
         },
       })
 
-      return () => unsubscribe()
-  }, [authUser, setCart, setLoading, setError])
+    return () => unsubscribe()
+  }, [authUser, setCart, setLoading, setError, All])
 
   return (
     <CartStateContext.Provider value={{ cart, loading, error }}>

@@ -147,16 +147,32 @@ const ProductDetail: React.FC<Props> = () => {
             } else if (authUser && isClient(userRole)) {
               // Check if this item is already in the existing cart, and if it is, check it's cart quantity vs it's inventory
 
-              if (cart && cart.length > 0) {
-                const foundItem = cart.find(
-                  (item) => item.product === product.id
-                )
+              const foundItem = cart
+                ? cart.find((item) => item.product === product.id)
+                : undefined
 
-                if (foundItem && foundItem.quantity >= product.inventory) {
-                  alert('Cannot add to cart, not enough inventory.')
-                  return
-                }
+              if (
+                foundItem &&
+                foundItem.quantity + quantity > product.inventory
+              ) {
+                const allowedQty = product.inventory - foundItem.quantity
+                setQuantity(allowedQty === 0 ? 1 : allowedQty)
+                alert(
+                  `You already have "${foundItem.quantity} pcs" of this item in your cart, so maximum quantity allowed for this item is "${allowedQty} pcs".`
+                )
+                return
               }
+
+              // if (cart && cart.length > 0) {
+              //   const foundItem = cart.find(
+              //     (item) => item.product === product.id
+              //   )
+
+              //   if (foundItem && foundItem.quantity >= product.inventory) {
+              //     alert('Cannot add to cart, not enough inventory.')
+              //     return
+              //   }
+              // }
 
               // Add The Product To Cart
               const finished = await addToCart(
