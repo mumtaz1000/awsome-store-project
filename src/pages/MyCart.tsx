@@ -53,6 +53,7 @@ const MyCart: React.FC<Props> = () => {
             <MyCartItem
               key={item.id}
               cartItem={item}
+              openDialog={openDialog}
               setOpenDialog={setOpenDialog}
               setCartItemToDelete={setCartItemToDelete}
             />

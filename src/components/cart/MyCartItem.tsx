@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Spinner from '../Spinner'
@@ -8,12 +8,14 @@ import { formatAmount } from '../../helpers'
 
 interface Props {
   cartItem: CartItem
+  openDialog: boolean
   setOpenDialog: (open: boolean) => void
   setCartItemToDelete: (item: CartItem | null) => void
 }
 
 const MyCartItem: React.FC<Props> = ({
   cartItem,
+  openDialog,
   setOpenDialog,
   setCartItemToDelete,
 }) => {
@@ -26,6 +28,13 @@ const MyCartItem: React.FC<Props> = ({
   const { addToCart, loading, error } = useManageCart()
 
   const [newQuantity, setNewQuantity] = useState(quantity)
+
+  useEffect(() => {
+    if (!openDialog) {
+      if (newQuantity !== quantity) setNewQuantity(quantity)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openDialog, quantity])
 
   return (
     <div className='cart-item'>
@@ -93,6 +102,12 @@ const MyCartItem: React.FC<Props> = ({
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
                     if (quantity === newQuantity) return
+
+                    if (newQuantity === 0) {
+                      setCartItemToDelete(cartItem)
+                      setOpenDialog(true)
+                      return
+                    }
 
                     return addToCart(
                       id,
