@@ -1002,7 +1002,7 @@
 /* Select Address Page */
 .select-address {
   margin-top: 1rem;
-  padding: 2rem 0;
+  padding: 1rem 0;
   display: flex;
   justify-content: space-between;
   border-top: 1px solid rgb(40, 44, 52, 0.3);
@@ -1015,17 +1015,10 @@
 }
 
 .select-address__add-new {
-  width: 50%;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
-}
-
-.add-new__header {
-  width: 50%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 
 @media screen and (max-width: 600px) {
@@ -1047,11 +1040,6 @@
   .select-address__add-new {
     width: 100%;
     display: block;
-  }
-
-  .add-new__header {
-    width: 70%;
-    justify-content: space-around;
   }
 }
 
