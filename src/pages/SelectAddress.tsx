@@ -1,6 +1,7 @@
 import React from 'react'
 
-import AddAndEditAddress from '../components/select-adress/AddAndEditAddress'
+import ShippingAddress from '../components/select-address/ShippingAddress'
+import AddAndEditAddress from '../components/select-address/AddAndEditAddress'
 import { useAuthContext } from '../state/auth-context'
 
 interface Props {}
@@ -16,9 +17,10 @@ const SelectAddress: React.FC<Props> = () => {
 
       <div className='select-address'>
         <div className='select-address__existing'>
-          {userInfo?.shippingAddresses?.length && (
-            <div>Shipping addressed go here</div>
-          )}
+          {userInfo?.shippingAddresses?.length &&
+            userInfo.shippingAddresses.map((address) => (
+              <ShippingAddress address={address} />
+            ))}
         </div>
 
         <div className='select-address__add-new'>

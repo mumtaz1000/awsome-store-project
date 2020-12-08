@@ -73,7 +73,7 @@ const AddAndEditAddress: React.FC<Props> = ({ userInfo }) => {
       <Input
         label='Phone'
         name='phone'
-        placeholder='Phone'
+        placeholder='Your phone number'
         ref={register({
           required: 'Phone is required.',
         })}
