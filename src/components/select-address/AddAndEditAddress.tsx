@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 
 import Input from '../Input'
 import Button from '../Button'
-import { useAddShippingAddress } from '../../hooks/useAddShippingAddress'
+import { useManageShippingAddress } from '../../hooks/useManageShippingAddress'
 import { Address, UserInfo } from '../../types'
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 }
 
 const AddAndEditAddress: React.FC<Props> = ({ userInfo }) => {
-  const { addNewAddress, loading, error } = useAddShippingAddress()
+  const { addNewAddress, loading, error } = useManageShippingAddress()
 
   const { register, errors, handleSubmit, reset } = useForm<
     Omit<Address, 'index'>

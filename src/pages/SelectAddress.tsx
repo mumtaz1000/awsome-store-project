@@ -18,8 +18,8 @@ const SelectAddress: React.FC<Props> = () => {
       <div className='select-address'>
         <div className='select-address__existing'>
           {userInfo?.shippingAddresses?.length &&
-            userInfo.shippingAddresses.map((address) => (
-              <ShippingAddress address={address} />
+            userInfo.shippingAddresses.map((address, index) => (
+              <ShippingAddress key={index} address={address} />
             ))}
         </div>
 
