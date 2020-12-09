@@ -75,5 +75,40 @@ export const useManageShippingAddress = () => {
     }
   }
 
-  return { addNewAddress, editAddress, loading, error }
+  const deleteAddress = async (index: number, userInfo: UserInfo) => {
+    try {
+      if (
+        !userInfo.shippingAddresses ||
+        userInfo.shippingAddresses.length === 0
+      ) {
+        setError('Sorry, something went wrong.')
+        return false
+      }
+
+      setLoading(true)
+
+      // An updated user info
+      const updatedUserInfo = {
+        shippingAddresses: userInfo.shippingAddresses.filter(
+          (_, i) => i !== index
+        ),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      }
+
+      // Update the user document in firestore
+      await usersRef.doc(userInfo.id).set(updatedUserInfo, { merge: true })
+      setLoading(false)
+
+      return true
+    } catch (err) {
+      const { message } = err as { message: string }
+
+      setError(message)
+      setLoading(false)
+
+      return false
+    }
+  }
+
+  return { addNewAddress, editAddress, deleteAddress, loading, error }
 }

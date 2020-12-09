@@ -7,9 +7,16 @@ import { Address } from '../../types'
 interface Props {
   address: Address
   setAddressToEdit: (address: Address | null) => void
+  setOpenDialog: (open: boolean) => void
+  setAddressToDelete: (address: Address | null) => void
 }
 
-const ShippingAddress: React.FC<Props> = ({ address, setAddressToEdit }) => {
+const ShippingAddress: React.FC<Props> = ({
+  address,
+  setAddressToEdit,
+  setOpenDialog,
+  setAddressToDelete,
+}) => {
   const { fullname, address1, address2, city, zipCode, phone } = address
 
   return (
@@ -40,6 +47,10 @@ const ShippingAddress: React.FC<Props> = ({ address, setAddressToEdit }) => {
           size='1x'
           color='red'
           style={{ cursor: 'pointer' }}
+          onClick={() => {
+            setAddressToDelete(address)
+            setOpenDialog(true)
+          }}
         />
       </div>
     </div>
