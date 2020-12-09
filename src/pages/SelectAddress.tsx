@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import ShippingAddress from '../components/select-address/ShippingAddress'
 import AddAndEditAddress from '../components/select-address/AddAndEditAddress'
 import AlertDialog from '../components/dialogs/AlertDialog'
+import Spinner from '../components/Spinner'
 import { useAuthContext } from '../state/auth-context'
 import { useDialog } from '../hooks/useDialog'
 import { useManageShippingAddress } from '../hooks/useManageShippingAddress'
@@ -19,6 +20,8 @@ const SelectAddress: React.FC<Props> = () => {
 
   const [addressToEdit, setAddressToEdit] = useState<Address | null>(null)
   const [addressToDelete, setAddressToDelete] = useState<Address | null>(null)
+
+  if (!userInfo) return <Spinner color='grey' height={50} width={50} />
 
   return (
     <div className='page--select-address'>
