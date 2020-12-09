@@ -72,7 +72,7 @@ const AddAndEditAddress: React.FC<Props> = ({
       style={{ width: '100%' }}
     >
       <p
-        className='paragraph paragraph--success paragraph--fucus'
+        className='paragraph paragraph--success paragraph--focus'
         style={{ cursor: 'pointer', textAlign: 'end', marginRight: '0.5rem' }}
         onClick={() => {
           reset()
