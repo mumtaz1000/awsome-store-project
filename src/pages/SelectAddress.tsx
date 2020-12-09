@@ -1,8 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 import ShippingAddress from '../components/select-address/ShippingAddress'
 import AddAndEditAddress from '../components/select-address/AddAndEditAddress'
 import { useAuthContext } from '../state/auth-context'
+import { Address } from '../types'
 
 interface Props {}
 
@@ -10,6 +11,8 @@ const SelectAddress: React.FC<Props> = () => {
   const {
     authState: { userInfo },
   } = useAuthContext()
+
+  const [addressToEdit, setAddressToEdit] = useState<Address | null>(null)
 
   return (
     <div className='page--select-address'>
@@ -19,14 +22,22 @@ const SelectAddress: React.FC<Props> = () => {
         <div className='select-address__existing'>
           {userInfo?.shippingAddresses?.length &&
             userInfo.shippingAddresses.map((address, index) => (
-              <ShippingAddress key={index} address={address} />
+              <ShippingAddress
+                key={index}
+                address={{ ...address, index }}
+                setAddressToEdit={setAddressToEdit}
+              />
             ))}
         </div>
 
         <div className='select-address__add-new'>
           <h3 className='header'>Add a new address</h3>
 
-          <AddAndEditAddress userInfo={userInfo} />
+          <AddAndEditAddress
+            userInfo={userInfo}
+            addressToEdit={addressToEdit}
+            setAddressToEdit={setAddressToEdit}
+          />
         </div>
       </div>
     </div>

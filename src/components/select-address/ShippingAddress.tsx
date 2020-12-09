@@ -6,9 +6,10 @@ import { Address } from '../../types'
 
 interface Props {
   address: Address
+  setAddressToEdit: (address: Address | null) => void
 }
 
-const ShippingAddress: React.FC<Props> = ({ address }) => {
+const ShippingAddress: React.FC<Props> = ({ address, setAddressToEdit }) => {
   const { fullname, address1, address2, city, zipCode, phone } = address
 
   return (
@@ -31,6 +32,7 @@ const ShippingAddress: React.FC<Props> = ({ address }) => {
           icon={['fas', 'edit']}
           size='1x'
           style={{ cursor: 'pointer' }}
+          onClick={() => setAddressToEdit(address)}
         />
 
         <FontAwesomeIcon
