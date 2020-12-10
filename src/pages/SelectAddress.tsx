@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
+import { Redirect } from 'react-router-dom'
 
 import ShippingAddress from '../components/select-address/ShippingAddress'
 import AddAndEditAddress from '../components/select-address/AddAndEditAddress'
 import AlertDialog from '../components/dialogs/AlertDialog'
 import Spinner from '../components/Spinner'
 import { useAuthContext } from '../state/auth-context'
+import { useCartContext } from '../state/cart-context'
 import { useDialog } from '../hooks/useDialog'
 import { useManageShippingAddress } from '../hooks/useManageShippingAddress'
 import { Address } from '../types'
@@ -15,11 +17,14 @@ const SelectAddress: React.FC<Props> = () => {
   const {
     authState: { userInfo },
   } = useAuthContext()
+  const { cart } = useCartContext()
   const { openDialog, setOpenDialog } = useDialog()
   const { deleteAddress, loading, error } = useManageShippingAddress()
 
   const [addressToEdit, setAddressToEdit] = useState<Address | null>(null)
   const [addressToDelete, setAddressToDelete] = useState<Address | null>(null)
+
+  if (!cart || (cart && cart.length === 0)) return <Redirect to='/' />
 
   if (!userInfo) return <Spinner color='grey' height={50} width={50} />
 

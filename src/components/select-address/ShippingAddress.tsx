@@ -1,4 +1,5 @@
 import React from 'react'
+import { useHistory } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Button from '../Button'
@@ -19,6 +20,8 @@ const ShippingAddress: React.FC<Props> = ({
 }) => {
   const { fullname, address1, address2, city, zipCode, phone } = address
 
+  const history = useHistory()
+
   return (
     <div className='shipping-address'>
       <div className='shipping-address__detail'>
@@ -30,7 +33,14 @@ const ShippingAddress: React.FC<Props> = ({
         <p className='paragraph'>{phone}</p>
       </div>
 
-      <Button width='100%' className='btn--orange' style={{ margin: '1rem 0' }}>
+      <Button
+        width='100%'
+        className='btn--orange'
+        style={{ margin: '1rem 0' }}
+        onClick={() =>
+          history.push({ pathname: '/buy/checkout', state: { address } })
+        }
+      >
         Deliver to this address
       </Button>
 
