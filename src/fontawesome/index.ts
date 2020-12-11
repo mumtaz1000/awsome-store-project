@@ -8,7 +8,13 @@ import {
   faTrashAlt,
   faCheckCircle,
 } from '@fortawesome/free-solid-svg-icons'
-import { faFacebookF, faGoogle } from '@fortawesome/free-brands-svg-icons'
+import {
+  faFacebookF,
+  faGoogle,
+  faCcMastercard,
+  faCcVisa,
+  faCcAmex,
+} from '@fortawesome/free-brands-svg-icons'
 
 library.add(
   faPlus,
@@ -19,5 +25,8 @@ library.add(
   faGoogle,
   faEdit,
   faTrashAlt,
-  faCheckCircle
+  faCheckCircle,
+  faCcMastercard,
+  faCcVisa,
+  faCcAmex
 )

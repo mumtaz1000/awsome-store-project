@@ -1,5 +1,7 @@
 import React from 'react'
 import { Switch, Route, Redirect } from 'react-router-dom'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements } from '@stripe/react-stripe-js'
 
 import MyCart from '../pages/MyCart'
 import SelectAddress from '../pages/SelectAddress'
@@ -9,6 +11,8 @@ import { Role } from '../types'
 import { isClient } from '../helpers'
 
 interface Props {}
+
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY!)
 
 const BuyRoutes: React.FC<Props> = (props) => {
   const { userRole } = props as { userRole: Role | null }
@@ -24,7 +28,9 @@ const BuyRoutes: React.FC<Props> = (props) => {
         <SelectAddress />
       </Route>
       <Route path='/buy/checkout'>
-        <Checkout />
+        <Elements stripe={stripePromise}>
+          <Checkout />
+        </Elements>
       </Route>
       <Route path='*'>
         <PageNotFound />
