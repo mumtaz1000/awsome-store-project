@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useHistory, Redirect } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { StripeCardElementChangeEvent } from '@stripe/stripe-js'
 import { CardElement, useElements } from '@stripe/react-stripe-js'
 import { useForm } from 'react-hook-form'
 
 import Button from '../components/Button'
+import Spinner from '../components/Spinner'
 import { useCartContext } from '../state/cart-context'
 import { Address } from '../types'
 import { calculateCartAmount, calculateCartQuantity } from '../helpers'
@@ -20,9 +21,8 @@ const Checkout: React.FC<Props> = () => {
   const [useNewCard, setUseNewCard] = useState(false)
   const [disabled, setDisabled] = useState(true)
   const [newCardError, setNewCardError] = useState('')
-
-  const { location } = useHistory<{ address: Address }>()
-  const { state } = location
+  const [address, setAddress] = useState<Address | null>(null)
+  const [loadAddress, setLoadAddress] = useState(true)
 
   const { cart } = useCartContext()
 
@@ -35,6 +35,19 @@ const Checkout: React.FC<Props> = () => {
     save?: boolean
     setDefault?: boolean
   }>()
+
+  useEffect(() => {
+    const addressData = window.localStorage.getItem('awesome_shippingAddress')
+
+    if (!addressData) {
+      setLoadAddress(false)
+      return
+    }
+
+    const address = JSON.parse(addressData)
+    setAddress(address)
+    setLoadAddress(false)
+  }, [setAddress, setLoadAddress])
 
   useEffect(() => {
     if (cart && cart.length > 0)
@@ -63,9 +76,11 @@ const Checkout: React.FC<Props> = () => {
     console.log(cardElement)
   })
 
-  if (!state?.address) return <Redirect to='/buy/select-address' />
+  if (loadAddress) return <Spinner color='grey' height={50} width={50} />
 
-  const { fullname, address1, address2, city, zipCode, phone } = state.address
+  if (!address) return <Redirect to='/buy/select-address' />
+
+  const { fullname, address1, address2, city, zipCode, phone } = address
 
   return (
     <div className='page--checkout'>

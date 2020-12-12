@@ -20,22 +20,22 @@ const BuyRoutes: React.FC<Props> = (props) => {
   if (!isClient(userRole)) return <Redirect to='/' />
 
   return (
-    <Switch>
-      <Route path='/buy/my-cart'>
-        <MyCart />
-      </Route>
-      <Route path='/buy/select-address'>
-        <SelectAddress />
-      </Route>
-      <Route path='/buy/checkout'>
-        <Elements stripe={stripePromise}>
+    <Elements stripe={stripePromise}>
+      <Switch>
+        <Route path='/buy/my-cart'>
+          <MyCart />
+        </Route>
+        <Route path='/buy/select-address'>
+          <SelectAddress />
+        </Route>
+        <Route path='/buy/checkout'>
           <Checkout />
-        </Elements>
-      </Route>
-      <Route path='*'>
-        <PageNotFound />
-      </Route>
-    </Switch>
+        </Route>
+        <Route path='*'>
+          <PageNotFound />
+        </Route>
+      </Switch>
+    </Elements>
   )
 }
 

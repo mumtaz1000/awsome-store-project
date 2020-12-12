@@ -37,9 +37,13 @@ const ShippingAddress: React.FC<Props> = ({
         width='100%'
         className='btn--orange'
         style={{ margin: '1rem 0' }}
-        onClick={() =>
-          history.push({ pathname: '/buy/checkout', state: { address } })
-        }
+        onClick={() => {
+          window.localStorage.setItem(
+            'awesome_shippingAddress',
+            JSON.stringify(address)
+          )
+          history.push({ pathname: '/buy/checkout' })
+        }}
       >
         Deliver to this address
       </Button>
