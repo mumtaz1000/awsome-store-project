@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useHistory, Redirect } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { CardElement } from '@stripe/react-stripe-js'
+import { StripeCardElementChangeEvent } from '@stripe/stripe-js'
+import { CardElement, useElements } from '@stripe/react-stripe-js'
+import { useForm } from 'react-hook-form'
 
 import Button from '../components/Button'
 import { useCartContext } from '../state/cart-context'
@@ -15,10 +17,24 @@ const Checkout: React.FC<Props> = () => {
     quantity: number
     amount: number
   }>()
+  const [useNewCard, setUseNewCard] = useState(false)
+  const [disabled, setDisabled] = useState(true)
+  const [newCardError, setNewCardError] = useState('')
+
   const { location } = useHistory<{ address: Address }>()
   const { state } = location
 
   const { cart } = useCartContext()
+
+  const elements = useElements()
+
+  const btnRef = useRef<HTMLButtonElement>(null)
+
+  const { register, errors, handleSubmit } = useForm<{
+    cardName: string
+    save?: boolean
+    setDefault?: boolean
+  }>()
 
   useEffect(() => {
     if (cart && cart.length > 0)
@@ -27,6 +43,25 @@ const Checkout: React.FC<Props> = () => {
         amount: calculateCartAmount(cart),
       })
   }, [cart])
+
+  const handleClickBtn = () => {
+    if (btnRef && btnRef.current) btnRef.current.click()
+  }
+
+  const handleCardChange = (e: StripeCardElementChangeEvent) => {
+    setDisabled(e.empty || !e.complete)
+    setNewCardError(e.error ? e.error.message : '')
+
+    if (e.complete) setNewCardError('')
+  }
+
+  const handleCompletePayment = handleSubmit((data) => {
+    if (!elements) return
+
+    const cardElement = elements.getElement(CardElement)
+    console.log(data)
+    console.log(cardElement)
+  })
 
   if (!state?.address) return <Redirect to='/buy/select-address' />
 
@@ -37,7 +72,7 @@ const Checkout: React.FC<Props> = () => {
       <div className='payment'>
         <h2 className='header'>Select a payment card</h2>
 
-        <form className='form'>
+        <form className='form' onSubmit={handleCompletePayment}>
           <div className='form--new-card'>
             <label htmlFor='newCard' className='card card--new'>
               <input
@@ -45,6 +80,7 @@ const Checkout: React.FC<Props> = () => {
                 name='card'
                 value='new-card'
                 style={{ width: '10%' }}
+                onClick={() => setUseNewCard(true)}
               />
 
               <h4
@@ -91,7 +127,14 @@ const Checkout: React.FC<Props> = () => {
                   className='input input--card-name'
                   name='cardName'
                   placeholder='Name on card'
+                  ref={register({ required: 'Card name is required.' })}
                 />
+
+                {errors.cardName && (
+                  <p className='paragraph paragraph--small paragraph--error'>
+                    {errors.cardName.message}
+                  </p>
+                )}
               </div>
 
               <div className='form__input-container form__input-container--card'>
@@ -102,19 +145,24 @@ const Checkout: React.FC<Props> = () => {
                       invalid: { color: 'red', iconColor: 'red' },
                     },
                   }}
+                  onChange={handleCardChange}
                 />
+
+                {newCardError && (
+                  <p className='paragraph paragraph--error'>{newCardError}</p>
+                )}
               </div>
 
               <div className='form__set-new-card'>
                 <div className='form__input-container'>
-                  <input type='checkbox' name='save' />
+                  <input type='checkbox' name='save' ref={register} />
                   <label htmlFor='saveCard' className='paragraph'>
                     Save this card
                   </label>
                 </div>
 
                 <div className='form__input-container'>
-                  <input type='checkbox' name='setDefault' />
+                  <input type='checkbox' name='setDefault' ref={register} />
                   <label htmlFor='setDefault' className='paragraph'>
                     Set as default
                   </label>
@@ -122,6 +170,8 @@ const Checkout: React.FC<Props> = () => {
               </div>
             </div>
           </div>
+
+          <button ref={btnRef} style={{ display: 'none' }}></button>
         </form>
       </div>
 
@@ -160,7 +210,12 @@ const Checkout: React.FC<Props> = () => {
         </div>
 
         <div className='summary__section'>
-          <Button width='100%' className='btn--orange btn--payment'>
+          <Button
+            width='100%'
+            className='btn--orange btn--payment'
+            onClick={handleClickBtn}
+            disabled={!useNewCard || disabled}
+          >
             Complete payment
           </Button>
         </div>
