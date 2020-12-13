@@ -1,5 +1,6 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
+import Stripe from 'stripe'
 
 admin.initializeApp()
 
@@ -7,6 +8,11 @@ const env = functions.config()
 const productsCollection = 'products'
 const productCountsCollection = 'product-counts'
 const productCountsDocument = 'counts'
+
+const stripe = new Stripe(env.stripe.secret_key, {
+  apiVersion: '2020-08-27',
+  typescript: true,
+})
 
 // product-counts --> counts --> { All: 10, Clothing: 3, Shoes: 2, Watched: 2, Accessories: 3 }
 
@@ -173,3 +179,28 @@ export const onProductDeleted = functions.firestore
       .doc(productCountsDocument)
       .set(counts)
   })
+
+export const createPaymentIntents = functions.https.onCall(
+  async (data, context) => {
+    try {
+      if (!context.auth) throw new Error('Not authenticated.')
+
+      const { amount, customer, payment_method } = data as {
+        amount: number
+        customer?: string
+        payment_method?: string
+      }
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount * 100,
+        currency: 'usd',
+        customer,
+        payment_method,
+      })
+
+      return { clientSecret: paymentIntent.client_secret }
+    } catch (error) {
+      throw error
+    }
+  }
+)

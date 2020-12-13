@@ -72,8 +72,12 @@ const Checkout: React.FC<Props> = () => {
     if (!elements) return
 
     const cardElement = elements.getElement(CardElement)
-    console.log(data)
-    console.log(cardElement)
+
+    // A. New Card
+    // A.1 New card, not save
+    // A.2 New card, save
+
+    // B. Save Card
   })
 
   if (loadAddress) return <Spinner color='grey' height={50} width={50} />
