@@ -8,7 +8,8 @@ import { useForm } from 'react-hook-form'
 import Button from '../components/Button'
 import Spinner from '../components/Spinner'
 import { useCartContext } from '../state/cart-context'
-import { Address } from '../types'
+import { useCheckout } from '../hooks/useCheckout'
+import { Address, CreatePaymentIntentData } from '../types'
 import { calculateCartAmount, calculateCartQuantity } from '../helpers'
 
 interface Props {}
@@ -25,6 +26,7 @@ const Checkout: React.FC<Props> = () => {
   const [loadAddress, setLoadAddress] = useState(true)
 
   const { cart } = useCartContext()
+  const { completePayment, loading, error } = useCheckout()
 
   const elements = useElements()
 
@@ -68,14 +70,28 @@ const Checkout: React.FC<Props> = () => {
     if (e.complete) setNewCardError('')
   }
 
-  const handleCompletePayment = handleSubmit((data) => {
-    if (!elements) return
+  const handleCompletePayment = handleSubmit(async (data) => {
+    if (!elements || !orderSummary) return
 
-    const cardElement = elements.getElement(CardElement)
+    if (useNewCard) {
+      // A. New Card
+      const cardElement = elements.getElement(CardElement)
+      if (!cardElement) return
 
-    // A. New Card
-    // A.1 New card, not save
-    // A.2 New card, save
+      if (typeof data.save === 'boolean') {
+        if (!data.save) {
+          // A.1 New card, not save
+          // 1. Prepare a create payemnt intent data to get a client secret
+          const createPaymentIntentData: CreatePaymentIntentData = {
+            amount: orderSummary.amount,
+          }
+
+          return completePayment(createPaymentIntentData)
+        } else {
+          // A.2 New card, save
+        }
+      }
+    }
 
     // B. Save Card
   })
@@ -233,7 +249,8 @@ const Checkout: React.FC<Props> = () => {
             width='100%'
             className='btn--orange btn--payment'
             onClick={handleClickBtn}
-            disabled={!useNewCard || disabled}
+            disabled={!useNewCard || disabled || loading}
+            loading={loading}
           >
             Complete payment
           </Button>
