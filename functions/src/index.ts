@@ -204,3 +204,26 @@ export const createPaymentIntents = functions.https.onCall(
     }
   }
 )
+
+export const createStripeCustomer = functions.https.onCall(
+  async (_, context) => {
+    try {
+      if (!context.auth) throw new Error('Not authenticated.')
+
+      const customer = await stripe.customers.create({
+        email: context.auth.token.email,
+      })
+
+      // Update the user document in the users collection in firestore
+      await admin
+        .firestore()
+        .collection('users')
+        .doc(context.auth.uid)
+        .set({ stripeCustomerId: customer.id }, { merge: true })
+
+      return { customerId: customer.id }
+    } catch (error) {
+      throw error
+    }
+  }
+)

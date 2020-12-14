@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Redirect } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { StripeCardElementChangeEvent } from '@stripe/stripe-js'
-import { CardElement, useElements } from '@stripe/react-stripe-js'
+import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useForm } from 'react-hook-form'
 
 import Button from '../components/Button'
 import Spinner from '../components/Spinner'
 import { useCartContext } from '../state/cart-context'
+import { useAuthContext } from '../state/auth-context'
 import { useCheckout } from '../hooks/useCheckout'
-import { Address, CreatePaymentIntentData } from '../types'
+import { Address, CreatePaymentIntentData, PaymentMethod } from '../types'
 import { calculateCartAmount, calculateCartQuantity } from '../helpers'
 
 interface Props {}
@@ -26,9 +27,18 @@ const Checkout: React.FC<Props> = () => {
   const [loadAddress, setLoadAddress] = useState(true)
 
   const { cart } = useCartContext()
-  const { completePayment, loading, error } = useCheckout()
+  const {
+    authState: { userInfo },
+  } = useAuthContext()
+  const {
+    completePayment,
+    createStripeCustomerId,
+    loading,
+    error,
+  } = useCheckout()
 
   const elements = useElements()
+  const stripe = useStripe()
 
   const btnRef = useRef<HTMLButtonElement>(null)
 
@@ -71,7 +81,7 @@ const Checkout: React.FC<Props> = () => {
   }
 
   const handleCompletePayment = handleSubmit(async (data) => {
-    if (!elements || !orderSummary) return
+    if (!elements || !orderSummary || !stripe || !userInfo) return
 
     if (useNewCard) {
       // A. New Card
@@ -79,16 +89,40 @@ const Checkout: React.FC<Props> = () => {
       if (!cardElement) return
 
       if (typeof data.save === 'boolean') {
-        if (!data.save) {
-          // A.1 New card, not save
-          // 1. Prepare a create payemnt intent data to get a client secret
-          const createPaymentIntentData: CreatePaymentIntentData = {
-            amount: orderSummary.amount,
-          }
+        // A.1 New card, not save
+        // 1. Prepare a create payemnt intent data to get a client secret
+        const createPaymentIntentData: CreatePaymentIntentData = {
+          amount: orderSummary.amount,
+        }
 
-          return completePayment(createPaymentIntentData)
-        } else {
+        // 2. Prepare a payment method to complete the payment
+        const payment_method: PaymentMethod = {
+          card: cardElement,
+          billing_details: { name: data.cardName },
+        }
+
+        if (data.save) {
           // A.2 New card, save
+          if (!userInfo.stripeCustomerId) {
+            // 1. User doesn't have a stripe customer id yet, create a new stripe customer.
+            const stripeCustomerId = await createStripeCustomerId()
+
+            createPaymentIntentData.customer = stripeCustomerId
+          } else {
+            // 2. User already has, use the existing one
+            createPaymentIntentData.customer = userInfo.stripeCustomerId
+          }
+        }
+
+        const finished = await completePayment(
+          createPaymentIntentData,
+          stripe,
+          payment_method,
+          data.save
+        )
+
+        if (finished) {
+          alert('Succeeded.')
         }
       }
     }
@@ -204,6 +238,8 @@ const Checkout: React.FC<Props> = () => {
                 </div>
               </div>
             </div>
+
+            {error && <p className='paragraph paragraph--error'>{error}</p>}
           </div>
 
           <button ref={btnRef} style={{ display: 'none' }}></button>
@@ -249,7 +285,7 @@ const Checkout: React.FC<Props> = () => {
             width='100%'
             className='btn--orange btn--payment'
             onClick={handleClickBtn}
-            disabled={!useNewCard || disabled || loading}
+            disabled={!stripe || !useNewCard || disabled || loading}
             loading={loading}
           >
             Complete payment

@@ -1,3 +1,5 @@
+import { CreatePaymentMethodCardData } from '@stripe/stripe-js'
+
 import { firebase } from '../firebase/config'
 
 export type AuthUser = firebase.User
@@ -83,3 +85,10 @@ export type CreatePaymentIntentData = {
   customer?: string
   payment_method?: string
 }
+
+export type PaymentMethod =
+  | string
+  | Pick<
+      CreatePaymentMethodCardData,
+      'card' | 'billing_details' | 'metadata' | 'payment_method'
+    >
