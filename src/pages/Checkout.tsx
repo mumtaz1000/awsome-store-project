@@ -115,10 +115,12 @@ const Checkout: React.FC<Props> = () => {
         }
 
         const finished = await completePayment(
-          createPaymentIntentData,
-          stripe,
-          payment_method,
-          data.save
+          { createPaymentIntentData, stripe, payment_method },
+          {
+            save: data.save,
+            setDefault: data.setDefault,
+            customerId: createPaymentIntentData.customer,
+          }
         )
 
         if (finished) {

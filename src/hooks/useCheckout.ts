@@ -8,11 +8,19 @@ export const useCheckout = () => {
   const { loading, setLoading, error, setError } = useAsyncCall()
 
   const completePayment = async (
-    createPaymentInentData: CreatePaymentIntentData,
-    stripe: Stripe,
-    payment_method: PaymentMethod,
-    save: boolean | undefined
+    paymentData: {
+      createPaymentIntentData: CreatePaymentIntentData
+      stripe: Stripe
+      payment_method: PaymentMethod
+    },
+    options: {
+      save: boolean | undefined
+      setDefault: boolean | undefined
+      customerId?: string
+    }
   ) => {
+    const { createPaymentIntentData, stripe, payment_method } = paymentData
+    const { save, setDefault, customerId } = options
     try {
       setLoading(true)
 
@@ -22,7 +30,7 @@ export const useCheckout = () => {
       )
 
       const paymentIntent = (await createPaymentIntents(
-        createPaymentInentData
+        createPaymentIntentData
       )) as { data: { clientSecret: string } }
 
       if (!paymentIntent.data.clientSecret) return
@@ -43,6 +51,14 @@ export const useCheckout = () => {
       }
 
       if (confirmPayment.paymentIntent?.status === 'succeeded') {
+        if (setDefault) {
+          const setDefaultCard = functions.httpsCallable('setDefaultCard')
+
+          await setDefaultCard({
+            customerId,
+            payment_method: confirmPayment.paymentIntent?.payment_method,
+          })
+        }
         setLoading(false)
         return true
       }
