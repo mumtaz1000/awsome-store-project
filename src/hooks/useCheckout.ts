@@ -1,7 +1,7 @@
 import { Stripe } from '@stripe/stripe-js'
 
 import { useAsyncCall } from './useAsyncCall'
-import { CreatePaymentIntentData, PaymentMethod } from '../types'
+import { CreatePaymentIntentData, CreatePaymentMethod } from '../types'
 import { functions } from '../firebase/config'
 
 export const useCheckout = () => {
@@ -11,7 +11,7 @@ export const useCheckout = () => {
     paymentData: {
       createPaymentIntentData: CreatePaymentIntentData
       stripe: Stripe
-      payment_method: PaymentMethod
+      payment_method: CreatePaymentMethod
     },
     options: {
       save: boolean | undefined

@@ -244,3 +244,26 @@ export const setDefaultCard = functions.https.onCall((data, context) => {
     throw error
   }
 })
+
+export const listPaymentMethods = functions.https.onCall(
+  async (data, context) => {
+    try {
+      if (!context.auth) throw new Error('Not authenticated.')
+
+      const { customerId } = data as { customerId: string }
+
+      // 1. Query all payment methods of the given customer
+      const paymentMethods = await stripe.paymentMethods.list({
+        customer: customerId,
+        type: 'card',
+      })
+
+      // 2. Query stripe customer object of the given customer
+      const customer = await stripe.customers.retrieve(customerId)
+
+      return { paymentMethods, customer }
+    } catch (error) {
+      throw error
+    }
+  }
+)
