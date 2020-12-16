@@ -155,6 +155,73 @@ const Checkout: React.FC<Props> = () => {
           <Spinner color='grey' height={30} width={30} />
         ) : (
           <form className='form' onSubmit={handleCompletePayment}>
+            {userCards?.data &&
+              userCards.data.length > 0 &&
+              userCards.data.map((method) => (
+                <label key={method.id} className='card' htmlFor={method.id}>
+                  <input
+                    type='radio'
+                    name='card'
+                    value={method.id}
+                    style={{ width: '10%' }}
+                  />
+
+                  <p className='paragraph' style={{ width: '40%' }}>
+                    **** **** **** {method.card?.last4}
+                  </p>
+
+                  <p className='paragraph' style={{ width: '10%' }}>
+                    {method.card?.brand === 'visa' ? (
+                      <FontAwesomeIcon
+                        icon={['fab', 'cc-visa']}
+                        size='2x'
+                        color='#206CAB'
+                      />
+                    ) : method.card?.brand === 'mastercard' ? (
+                      <FontAwesomeIcon
+                        icon={['fab', 'cc-mastercard']}
+                        size='2x'
+                        color='#EB2230'
+                      />
+                    ) : method.card?.brand === 'amex' ? (
+                      <FontAwesomeIcon
+                        icon={['fab', 'cc-amex']}
+                        size='2x'
+                        color='#099DD9'
+                      />
+                    ) : (
+                      method.card?.brand
+                    )}
+                  </p>
+
+                  <div style={{ width: '30%' }}>
+                    {method.id ===
+                    stripeCustomer?.invoice_settings.default_payment_method ? (
+                      <p className='paragraph--center paragraph--focus'>
+                        Default
+                      </p>
+                    ) : (
+                      <div>
+                        <input type='checkbox' name='setDefault' />
+                        <label
+                          htmlFor='setDefault'
+                          className='set-default-card'
+                        >
+                          Set as default
+                        </label>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className='paragraph' style={{ width: '10%' }}>
+                    <FontAwesomeIcon
+                      icon={['fas', 'trash-alt']}
+                      size='1x'
+                      color='red'
+                    />
+                  </p>
+                </label>
+              ))}
             <div className='form--new-card'>
               <label htmlFor='newCard' className='card card--new'>
                 <input
