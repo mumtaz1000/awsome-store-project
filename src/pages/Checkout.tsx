@@ -42,7 +42,6 @@ const Checkout: React.FC<Props> = () => {
     stripeCustomer,
     loading: fetchCardsLoading,
     error: fetchCardsError,
-    fetchCards,
   } = useFetchCards(userInfo)
 
   const elements = useElements()
