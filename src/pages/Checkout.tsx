@@ -152,8 +152,32 @@ const Checkout: React.FC<Props> = () => {
           reset()
         }
       }
+    } else if (useCard.type === 'saved' && useCard.payment_method) {
+      // B. Saved Card
+      // 1. Prepare a create payemnt intent data to get a client secret
+      const createPaymentIntentData: CreatePaymentIntentData = {
+        amount: orderSummary.amount,
+        customer: stripeCustomer?.id,
+        payment_method: useCard.payment_method,
+      }
+
+      // 2. Prepare a payment method to complete the payment
+      const payment_method: CreatePaymentMethod = useCard.payment_method
+
+      const finished = await completePayment(
+        { createPaymentIntentData, stripe, payment_method },
+        {
+          save: data.save,
+          setDefault: data.setDefault,
+          customerId: stripeCustomer?.id,
+        }
+      )
+
+      if (finished) {
+        alert('Succeeded.')
+        reset()
+      }
     }
-    // B. Saved Card
   })
 
   if (loadAddress) return <Spinner color='grey' height={50} width={50} />
