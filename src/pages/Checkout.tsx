@@ -21,11 +21,15 @@ const Checkout: React.FC<Props> = () => {
     quantity: number
     amount: number
   }>()
-  const [useNewCard, setUseNewCard] = useState(false)
-  const [disabled, setDisabled] = useState(true)
-  const [newCardError, setNewCardError] = useState('')
   const [address, setAddress] = useState<Address | null>(null)
   const [loadAddress, setLoadAddress] = useState(true)
+
+  const [useCard, setUseCard] = useState<
+    { type: 'new' } | { type: 'saved'; payment_method: string }
+  >({ type: 'new' })
+  const [disabled, setDisabled] = useState(true)
+  const [newCardError, setNewCardError] = useState('')
+  const [openSetDefault, setOpenSetDefault] = useState(false)
 
   const { cart } = useCartContext()
   const {
@@ -49,7 +53,7 @@ const Checkout: React.FC<Props> = () => {
 
   const btnRef = useRef<HTMLButtonElement>(null)
 
-  const { register, errors, handleSubmit } = useForm<{
+  const { register, errors, handleSubmit, reset } = useForm<{
     cardName: string
     save?: boolean
     setDefault?: boolean
@@ -76,6 +80,19 @@ const Checkout: React.FC<Props> = () => {
       })
   }, [cart])
 
+  useEffect(() => {
+    if (userCards?.data && userCards.data.length > 0) {
+      setUseCard({
+        type: 'saved',
+        payment_method:
+          stripeCustomer?.invoice_settings.default_payment_method ||
+          userCards.data[0].id,
+      })
+      setDisabled(false)
+      reset()
+    }
+  }, [userCards?.data, stripeCustomer])
+
   const handleClickBtn = () => {
     if (btnRef && btnRef.current) btnRef.current.click()
   }
@@ -90,7 +107,7 @@ const Checkout: React.FC<Props> = () => {
   const handleCompletePayment = handleSubmit(async (data) => {
     if (!elements || !orderSummary || !stripe || !userInfo) return
 
-    if (useNewCard) {
+    if (useCard.type === 'new') {
       // A. New Card
       const cardElement = elements.getElement(CardElement)
       if (!cardElement) return
@@ -132,11 +149,11 @@ const Checkout: React.FC<Props> = () => {
 
         if (finished) {
           alert('Succeeded.')
+          reset()
         }
       }
     }
-
-    // B. Save Card
+    // B. Saved Card
   })
 
   if (loadAddress) return <Spinner color='grey' height={50} width={50} />
@@ -154,6 +171,7 @@ const Checkout: React.FC<Props> = () => {
           <Spinner color='grey' height={30} width={30} />
         ) : (
           <form className='form' onSubmit={handleCompletePayment}>
+            {/* Saved Card */}
             {userCards?.data &&
               userCards.data.length > 0 &&
               userCards.data.map((method) => (
@@ -163,6 +181,15 @@ const Checkout: React.FC<Props> = () => {
                     name='card'
                     value={method.id}
                     style={{ width: '10%' }}
+                    defaultChecked={
+                      useCard.type === 'saved' &&
+                      useCard.payment_method === method.id
+                    }
+                    onClick={() => {
+                      setUseCard({ type: 'saved', payment_method: method.id })
+                      setDisabled(false)
+                      reset()
+                    }}
                   />
 
                   <p className='paragraph' style={{ width: '40%' }}>
@@ -199,9 +226,14 @@ const Checkout: React.FC<Props> = () => {
                       <p className='paragraph--center paragraph--focus'>
                         Default
                       </p>
-                    ) : (
+                    ) : useCard.type === 'saved' &&
+                      useCard.payment_method === method.id ? (
                       <div>
-                        <input type='checkbox' name='setDefault' />
+                        <input
+                          type='checkbox'
+                          name='setDefault'
+                          ref={register}
+                        />
                         <label
                           htmlFor='setDefault'
                           className='set-default-card'
@@ -209,7 +241,7 @@ const Checkout: React.FC<Props> = () => {
                           Set as default
                         </label>
                       </div>
-                    )}
+                    ) : undefined}
                   </div>
 
                   <p className='paragraph' style={{ width: '10%' }}>
@@ -221,14 +253,20 @@ const Checkout: React.FC<Props> = () => {
                   </p>
                 </label>
               ))}
+
+            {/* New Card */}
             <div className='form--new-card'>
               <label htmlFor='newCard' className='card card--new'>
                 <input
                   type='radio'
                   name='card'
-                  value='new-card'
+                  defaultChecked={useCard.type === 'new'}
                   style={{ width: '10%' }}
-                  onClick={() => setUseNewCard(true)}
+                  onClick={() => {
+                    setUseCard({ type: 'new' })
+                    setDisabled(true)
+                    reset()
+                  }}
                 />
 
                 <h4
@@ -268,62 +306,82 @@ const Checkout: React.FC<Props> = () => {
                 </p>
               </label>
 
-              <div className='new-card__form'>
-                <div className='form__input-container form__input-container--card'>
-                  <input
-                    type='text'
-                    className='input input--card-name'
-                    name='cardName'
-                    placeholder='Name on card'
-                    ref={register({ required: 'Card name is required.' })}
-                  />
+              {useCard.type === 'new' && (
+                <div className='new-card__form'>
+                  <div className='form__input-container form__input-container--card'>
+                    <input
+                      type='text'
+                      className='input input--card-name'
+                      name='cardName'
+                      placeholder='Name on card'
+                      ref={register({ required: 'Card name is required.' })}
+                    />
 
-                  {errors.cardName && (
-                    <p className='paragraph paragraph--small paragraph--error'>
-                      {errors.cardName.message}
-                    </p>
-                  )}
-                </div>
-
-                <div className='form__input-container form__input-container--card'>
-                  <CardElement
-                    options={{
-                      style: {
-                        base: { color: 'blue', iconColor: 'blue' },
-                        invalid: { color: 'red', iconColor: 'red' },
-                      },
-                    }}
-                    onChange={handleCardChange}
-                  />
-
-                  {newCardError && (
-                    <p className='paragraph paragraph--error'>{newCardError}</p>
-                  )}
-                </div>
-
-                <div className='form__set-new-card'>
-                  <div className='form__input-container'>
-                    <input type='checkbox' name='save' ref={register} />
-                    <label htmlFor='saveCard' className='paragraph'>
-                      Save this card
-                    </label>
+                    {errors.cardName && (
+                      <p className='paragraph paragraph--small paragraph--error'>
+                        {errors.cardName.message}
+                      </p>
+                    )}
                   </div>
 
-                  <div className='form__input-container'>
-                    <input type='checkbox' name='setDefault' ref={register} />
-                    <label htmlFor='setDefault' className='paragraph'>
-                      Set as default
-                    </label>
+                  <div className='form__input-container form__input-container--card'>
+                    <CardElement
+                      options={{
+                        style: {
+                          base: { color: 'blue', iconColor: 'blue' },
+                          invalid: { color: 'red', iconColor: 'red' },
+                        },
+                      }}
+                      onChange={handleCardChange}
+                    />
+
+                    {newCardError && (
+                      <p className='paragraph paragraph--error'>
+                        {newCardError}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className='form__set-new-card'>
+                    <div className='form__input-container'>
+                      <input
+                        type='checkbox'
+                        name='save'
+                        ref={register}
+                        onClick={() => setOpenSetDefault((prev) => !prev)}
+                      />
+                      <label htmlFor='saveCard' className='paragraph'>
+                        Save this card
+                      </label>
+                    </div>
+
+                    {openSetDefault && (
+                      <div className='form__input-container'>
+                        <input
+                          type='checkbox'
+                          name='setDefault'
+                          ref={register}
+                        />
+                        <label htmlFor='setDefault' className='paragraph'>
+                          Set as default
+                        </label>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-
-              {error && <p className='paragraph paragraph--error'>{error}</p>}
+              )}
             </div>
 
-            <button ref={btnRef} style={{ display: 'none' }}></button>
+            {/* Hidden Button */}
+            <button
+              ref={btnRef}
+              style={{ display: 'none' }}
+              disabled={!stripe || !useCard || disabled || loading}
+            ></button>
           </form>
         )}
+
+        {error && <p className='paragraph paragraph--error'>{error}</p>}
 
         {fetchCardsError && (
           <p className='paragraph paragraph--error'>{fetchCardsError}</p>
@@ -369,7 +427,7 @@ const Checkout: React.FC<Props> = () => {
             width='100%'
             className='btn--orange btn--payment'
             onClick={handleClickBtn}
-            disabled={!stripe || !useNewCard || disabled || loading}
+            disabled={!stripe || !useCard || disabled || loading}
             loading={loading}
           >
             Complete payment
