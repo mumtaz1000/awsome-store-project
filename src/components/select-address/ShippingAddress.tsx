@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Button from '../Button'
 import { Address } from '../../types'
 
+export const address_key = 'awesome_shippingAddress'
+
 interface Props {
   address: Address
   setAddressToEdit: (address: Address | null) => void
@@ -38,10 +40,7 @@ const ShippingAddress: React.FC<Props> = ({
         className='btn--orange'
         style={{ margin: '1rem 0' }}
         onClick={() => {
-          window.localStorage.setItem(
-            'awesome_shippingAddress',
-            JSON.stringify(address)
-          )
+          window.localStorage.setItem(address_key, JSON.stringify(address))
           history.push({ pathname: '/buy/checkout' })
         }}
       >

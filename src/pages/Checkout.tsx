@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Redirect } from 'react-router-dom'
+import { Redirect, useHistory } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { StripeCardElementChangeEvent } from '@stripe/stripe-js'
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
@@ -7,10 +7,12 @@ import { useForm } from 'react-hook-form'
 
 import Button from '../components/Button'
 import Spinner from '../components/Spinner'
+import AlertDialog from '../components/dialogs/AlertDialog'
 import { useCartContext } from '../state/cart-context'
 import { useAuthContext } from '../state/auth-context'
 import { useCheckout } from '../hooks/useCheckout'
 import { useFetchCards } from '../hooks/useFetchCards'
+import { useDialog } from '../hooks/useDialog'
 import {
   Address,
   CartItem,
@@ -19,6 +21,7 @@ import {
   UploadOrder,
 } from '../types'
 import { calculateCartAmount, calculateCartQuantity } from '../helpers'
+import { address_key } from './../components/select-address/ShippingAddress'
 
 interface Props {}
 
@@ -54,9 +57,12 @@ const Checkout: React.FC<Props> = () => {
     loading: fetchCardsLoading,
     error: fetchCardsError,
   } = useFetchCards(userInfo)
+  const { openDialog, setOpenDialog } = useDialog()
 
   const elements = useElements()
   const stripe = useStripe()
+
+  const history = useHistory()
 
   const btnRef = useRef<HTMLButtonElement>(null)
 
@@ -67,7 +73,7 @@ const Checkout: React.FC<Props> = () => {
   }>()
 
   useEffect(() => {
-    const addressData = window.localStorage.getItem('awesome_shippingAddress')
+    const addressData = window.localStorage.getItem(address_key)
 
     if (!addressData) {
       setLoadAddress(false)
@@ -172,7 +178,7 @@ const Checkout: React.FC<Props> = () => {
         )
 
         if (finished) {
-          alert('Succeeded.')
+          setOpenDialog(true)
           reset()
         }
       }
@@ -200,7 +206,7 @@ const Checkout: React.FC<Props> = () => {
       )
 
       if (finished) {
-        alert('Succeeded.')
+        setOpenDialog(true)
         reset()
       }
     }
@@ -484,6 +490,18 @@ const Checkout: React.FC<Props> = () => {
           </Button>
         </div>
       </div>
+
+      {openDialog && (
+        <AlertDialog
+          header='Confirm Payment'
+          message='You have successfully made the payment, you can click "Ok" below to view your order.'
+          onConfirm={() => {
+            setOpenDialog(false)
+            history.replace('/orders/my-orders')
+          }}
+          confirmText='Ok'
+        />
+      )}
     </div>
   )
 }

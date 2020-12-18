@@ -9,6 +9,7 @@ import {
 } from '../types'
 import { functions, firebase, db } from '../firebase/config'
 import { cartRef, ordersRef } from './../firebase/index'
+import { address_key } from '../components/select-address/ShippingAddress'
 
 export const useCheckout = () => {
   const { loading, setLoading, error, setError } = useAsyncCall()
@@ -93,6 +94,7 @@ export const useCheckout = () => {
             })
         })
 
+        window.localStorage.removeItem(address_key)
         setLoading(false)
         return true
       }
