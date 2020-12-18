@@ -11,7 +11,13 @@ import { useCartContext } from '../state/cart-context'
 import { useAuthContext } from '../state/auth-context'
 import { useCheckout } from '../hooks/useCheckout'
 import { useFetchCards } from '../hooks/useFetchCards'
-import { Address, CreatePaymentIntentData, CreatePaymentMethod } from '../types'
+import {
+  Address,
+  CartItem,
+  CreatePaymentIntentData,
+  CreatePaymentMethod,
+  UploadOrder,
+} from '../types'
 import { calculateCartAmount, calculateCartQuantity } from '../helpers'
 
 interface Props {}
@@ -20,6 +26,7 @@ const Checkout: React.FC<Props> = () => {
   const [orderSummary, setOrderSummary] = useState<{
     quantity: number
     amount: number
+    orderItems: CartItem[]
   }>()
   const [address, setAddress] = useState<Address | null>(null)
   const [loadAddress, setLoadAddress] = useState(true)
@@ -77,6 +84,7 @@ const Checkout: React.FC<Props> = () => {
       setOrderSummary({
         quantity: calculateCartQuantity(cart),
         amount: calculateCartAmount(cart),
+        orderItems: cart,
       })
   }, [cart])
 
@@ -91,7 +99,7 @@ const Checkout: React.FC<Props> = () => {
       setDisabled(false)
       reset()
     }
-  }, [userCards?.data, stripeCustomer])
+  }, [userCards?.data, stripeCustomer, reset])
 
   const handleClickBtn = () => {
     if (btnRef && btnRef.current) btnRef.current.click()
@@ -105,7 +113,21 @@ const Checkout: React.FC<Props> = () => {
   }
 
   const handleCompletePayment = handleSubmit(async (data) => {
-    if (!elements || !orderSummary || !stripe || !userInfo) return
+    if (!elements || !orderSummary || !stripe || !userInfo || !address) return
+
+    const { amount, quantity, orderItems } = orderSummary
+
+    const newOrder: UploadOrder = {
+      items: orderItems.map(({ quantity, user, item }) => ({
+        quantity,
+        user,
+        item,
+      })),
+      amount,
+      totalQuantity: quantity,
+      shippingAddress: address,
+      user: { id: userInfo.id, name: userInfo.username },
+    }
 
     if (useCard.type === 'new') {
       // A. New Card
@@ -144,7 +166,9 @@ const Checkout: React.FC<Props> = () => {
             save: data.save,
             setDefault: data.setDefault,
             customerId: createPaymentIntentData.customer,
-          }
+          },
+          newOrder,
+          orderItems
         )
 
         if (finished) {
@@ -170,7 +194,9 @@ const Checkout: React.FC<Props> = () => {
           save: data.save,
           setDefault: data.setDefault,
           customerId: stripeCustomer?.id,
-        }
+        },
+        newOrder,
+        orderItems
       )
 
       if (finished) {

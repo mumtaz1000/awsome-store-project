@@ -1,8 +1,14 @@
 import { Stripe } from '@stripe/stripe-js'
 
 import { useAsyncCall } from './useAsyncCall'
-import { CreatePaymentIntentData, CreatePaymentMethod } from '../types'
-import { functions } from '../firebase/config'
+import {
+  CartItem,
+  CreatePaymentIntentData,
+  CreatePaymentMethod,
+  UploadOrder,
+} from '../types'
+import { functions, firebase, db } from '../firebase/config'
+import { cartRef, ordersRef } from './../firebase/index'
 
 export const useCheckout = () => {
   const { loading, setLoading, error, setError } = useAsyncCall()
@@ -17,7 +23,9 @@ export const useCheckout = () => {
       save: boolean | undefined
       setDefault: boolean | undefined
       customerId?: string
-    }
+    },
+    order: UploadOrder,
+    cart: CartItem[]
   ) => {
     const { createPaymentIntentData, stripe, payment_method } = paymentData
     const { save, setDefault, customerId } = options
@@ -59,6 +67,32 @@ export const useCheckout = () => {
             payment_method: confirmPayment.paymentIntent?.payment_method,
           })
         }
+
+        // Create a new order in firestore
+        const uploadOrder: UploadOrder = {
+          ...order,
+          paymentStatus: 'Success',
+          shipmentStatus: 'New',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }
+
+        await ordersRef.add(uploadOrder).then(() => {
+          // Delete the cart items from firestore
+          cartRef
+            .where('user', '==', order.user.id)
+            .get()
+            .then((snapshots) => {
+              const batch = db.batch()
+              snapshots.forEach((doc) =>
+                cart.forEach((item) =>
+                  item.id === doc.id ? batch.delete(doc.ref) : null
+                )
+              )
+
+              return batch.commit()
+            })
+        })
+
         setLoading(false)
         return true
       }
