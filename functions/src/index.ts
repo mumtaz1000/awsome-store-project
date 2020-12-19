@@ -267,3 +267,21 @@ export const listPaymentMethods = functions.https.onCall(
     }
   }
 )
+
+export const detachPaymentMethod = functions.https.onCall(
+  async (data, context) => {
+    try {
+      if (!context.auth) throw new Error('Not authenticated.')
+
+      const { payment_method } = data as { payment_method: string }
+
+      const paymentMethod = await stripe.paymentMethods.detach(payment_method)
+
+      if (!paymentMethod) throw new Error('Sorry, something went wrong.')
+
+      return { paymentMethod }
+    } catch (error) {
+      throw error
+    }
+  }
+)
