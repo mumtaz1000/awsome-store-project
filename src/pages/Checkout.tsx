@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { Redirect, useHistory } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { StripeCardElementChangeEvent } from '@stripe/stripe-js'
+import { PaymentMethod, StripeCardElementChangeEvent } from '@stripe/stripe-js'
 import { CardElement, useElements, useStripe } from '@stripe/react-stripe-js'
 import { useForm } from 'react-hook-form'
 
@@ -13,6 +13,7 @@ import { useAuthContext } from '../state/auth-context'
 import { useCheckout } from '../hooks/useCheckout'
 import { useFetchCards } from '../hooks/useFetchCards'
 import { useDialog } from '../hooks/useDialog'
+import { useRemoveCard } from '../hooks/useRemoveCard'
 import {
   Address,
   CartItem,
@@ -40,6 +41,10 @@ const Checkout: React.FC<Props> = () => {
   const [disabled, setDisabled] = useState(true)
   const [newCardError, setNewCardError] = useState('')
   const [openSetDefault, setOpenSetDefault] = useState(false)
+  const [cardToDelete, setCardToDelete] = useState<PaymentMethod | null>(null)
+  const [dialogType, setDialogType] = useState<
+    'inform_payment' | 'remove_card' | null
+  >(null)
 
   const { cart } = useCartContext()
   const {
@@ -54,9 +59,15 @@ const Checkout: React.FC<Props> = () => {
   const {
     userCards,
     stripeCustomer,
+    setUserCards,
     loading: fetchCardsLoading,
     error: fetchCardsError,
   } = useFetchCards(userInfo)
+  const {
+    removeCard,
+    loading: removeCardLoading,
+    error: removeCardError,
+  } = useRemoveCard()
   const { openDialog, setOpenDialog } = useDialog()
 
   const elements = useElements()
@@ -103,6 +114,10 @@ const Checkout: React.FC<Props> = () => {
           userCards.data[0].id,
       })
       setDisabled(false)
+      reset()
+    } else {
+      setUseCard({ type: 'new' })
+      setDisabled(true)
       reset()
     }
   }, [userCards?.data, stripeCustomer, reset])
@@ -179,6 +194,7 @@ const Checkout: React.FC<Props> = () => {
 
         if (finished) {
           setOpenDialog(true)
+          setDialogType('inform_payment')
           reset()
         }
       }
@@ -207,6 +223,7 @@ const Checkout: React.FC<Props> = () => {
 
       if (finished) {
         setOpenDialog(true)
+        setDialogType('inform_payment')
         reset()
       }
     }
@@ -227,7 +244,7 @@ const Checkout: React.FC<Props> = () => {
           <Spinner color='grey' height={30} width={30} />
         ) : (
           <form className='form' onSubmit={handleCompletePayment}>
-            {/* Saved Card */}
+            {/* Saved Cards */}
             {userCards?.data &&
               userCards.data.length > 0 &&
               userCards.data.map((method) => (
@@ -237,11 +254,11 @@ const Checkout: React.FC<Props> = () => {
                     name='card'
                     value={method.id}
                     style={{ width: '10%' }}
-                    defaultChecked={
+                    checked={
                       useCard.type === 'saved' &&
                       useCard.payment_method === method.id
                     }
-                    onClick={() => {
+                    onChange={() => {
                       setUseCard({ type: 'saved', payment_method: method.id })
                       setDisabled(false)
                       reset()
@@ -300,7 +317,15 @@ const Checkout: React.FC<Props> = () => {
                     ) : undefined}
                   </div>
 
-                  <p className='paragraph' style={{ width: '10%' }}>
+                  <p
+                    className='paragraph'
+                    style={{ width: '10%', cursor: 'pointer' }}
+                    onClick={() => {
+                      setCardToDelete(method)
+                      setOpenDialog(true)
+                      setDialogType('remove_card')
+                    }}
+                  >
                     <FontAwesomeIcon
                       icon={['fas', 'trash-alt']}
                       size='1x'
@@ -316,9 +341,9 @@ const Checkout: React.FC<Props> = () => {
                 <input
                   type='radio'
                   name='card'
-                  defaultChecked={useCard.type === 'new'}
+                  checked={useCard.type === 'new'}
                   style={{ width: '10%' }}
-                  onClick={() => {
+                  onChange={() => {
                     setUseCard({ type: 'new' })
                     setDisabled(true)
                     reset()
@@ -491,15 +516,50 @@ const Checkout: React.FC<Props> = () => {
         </div>
       </div>
 
-      {openDialog && (
+      {openDialog && dialogType === 'inform_payment' && (
         <AlertDialog
           header='Confirm Payment'
           message='You have successfully made the payment, you can click "Ok" below to view your order.'
           onConfirm={() => {
             setOpenDialog(false)
+            setDialogType(null)
             history.replace('/orders/my-orders')
           }}
           confirmText='Ok'
+        />
+      )}
+
+      {openDialog && dialogType === 'remove_card' && cardToDelete && (
+        <AlertDialog
+          header='Please confirm'
+          message={`Are you sure you want to remove ${cardToDelete.card?.brand}: **** **** **** ${cardToDelete.card?.last4}?`}
+          onCancel={() => {
+            setCardToDelete(null)
+            setOpenDialog(false)
+            setDialogType(null)
+          }}
+          onConfirm={async () => {
+            if (!cardToDelete) return
+
+            const paymentMethod = await removeCard(cardToDelete.id)
+
+            if (paymentMethod) {
+              setCardToDelete(null)
+              setOpenDialog(false)
+              setDialogType(null)
+              setUserCards((prev) =>
+                prev
+                  ? {
+                      data: prev.data.filter(
+                        (item) => item.id !== paymentMethod.id
+                      ),
+                    }
+                  : prev
+              )
+            }
+          }}
+          loading={removeCardLoading}
+          error={removeCardError}
         />
       )}
     </div>

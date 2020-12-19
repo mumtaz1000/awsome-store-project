@@ -47,5 +47,5 @@ export const useFetchCards = (userInfo: UserInfo | null) => {
     }
   }, [userInfo, setUserCards, setStripeCustomer, setLoading, setError])
 
-  return { userCards, stripeCustomer, loading, error }
+  return { userCards, stripeCustomer, setUserCards, loading, error }
 }
