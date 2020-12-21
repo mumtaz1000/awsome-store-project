@@ -8,6 +8,9 @@ const env = functions.config()
 const productsCollection = 'products'
 const productCountsCollection = 'product-counts'
 const productCountsDocument = 'counts'
+const ordersCollection = 'orders'
+const orderCountsCollection = 'order-counts'
+const orderCountsDocument = 'counts'
 
 const stripe = new Stripe(env.stripe.secret_key, {
   apiVersion: '2020-08-27',
@@ -21,6 +24,7 @@ type Counts = {
   [key in 'All' | ProductCategory]: number
 }
 type Product = {
+  id: string
   title: string
   description: string
   imageUrl: string
@@ -30,6 +34,21 @@ type Product = {
   category: ProductCategory
   inventory: number
   creator: string
+}
+
+type CartItem = {
+  id: string
+  product: string // Change from Product to string
+  quantity: number
+  user: string
+  item: Product
+}
+type Order = {
+  id: string
+  items: Pick<CartItem, 'quantity' | 'user' | 'item'>[]
+  amount: number
+  totalQuantity: number
+  user: { id: string; name: string }
 }
 
 export const onSignup = functions.https.onCall(async (data, context) => {
@@ -178,6 +197,66 @@ export const onProductDeleted = functions.firestore
       .collection(productCountsCollection)
       .doc(productCountsDocument)
       .set(counts)
+  })
+
+export const onOrderCreated = functions.firestore
+  .document(`${ordersCollection}/{orderId}`)
+  .onCreate(async (snapshot, context) => {
+    const order = snapshot.data() as Order
+
+    // 1. Update the products inventory
+    order.items.forEach((cartItem) =>
+      admin
+        .firestore()
+        .collection(productsCollection)
+        .doc(cartItem.item.id)
+        .get()
+        .then((doc) => {
+          if (!doc.exists) return
+
+          const product = doc.data() as Product
+
+          return admin
+            .firestore()
+            .collection(productsCollection)
+            .doc(cartItem.item.id)
+            .set(
+              {
+                inventory:
+                  product.inventory >= cartItem.quantity
+                    ? product.inventory - cartItem.quantity
+                    : 0,
+              },
+              { merge: true }
+            )
+        })
+    )
+
+    // 2. Create/Update the order-counts/counts
+    const countsData = await admin
+      .firestore()
+      .collection(orderCountsCollection)
+      .doc(orderCountsDocument)
+      .get()
+
+    if (!countsData.exists) {
+      // The first order, create a new counts document
+
+      return admin
+        .firestore()
+        .collection(orderCountsCollection)
+        .doc(orderCountsDocument)
+        .set({ orderCounts: 1 })
+    } else {
+      // Found the counts document, update it
+      const counts = countsData.data() as { orderCounts: number }
+
+      return admin
+        .firestore()
+        .collection(orderCountsCollection)
+        .doc(orderCountsDocument)
+        .set({ orderCounts: counts.orderCounts + 1 })
+    }
   })
 
 export const createPaymentIntents = functions.https.onCall(
