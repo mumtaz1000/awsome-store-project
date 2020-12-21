@@ -1,0 +1,70 @@
+import React, {
+  createContext,
+  useContext,
+  Dispatch,
+  SetStateAction,
+  useState,
+  useEffect,
+} from 'react'
+
+import { useAuthContext } from './auth-context'
+import { isAdmin } from '../helpers'
+import { orderCountsRef} from '../firebase'
+
+interface Props {}
+
+type OrderCountsState = {
+  orderCounts: number
+}
+
+type OrderCountsDispatch = {
+  setOrderCounts: Dispatch<SetStateAction<number>>
+}
+
+const OrderCountsStateContext = createContext<OrderCountsState | undefined>(undefined)
+const OrderCountsDispatchContext = createContext<OrderCountsDispatch | undefined>(
+  undefined
+)
+
+const OrderCountsContextProvider: React.FC<Props> = ({ children }) => {
+  const [orderCounts, setOrderCounts] = useState(0)
+
+  const {
+    authState: { userInfo },
+  } = useAuthContext()
+
+  useEffect(() => {
+    if (!userInfo || !isAdmin(userInfo.role)) return setOrderCounts(0)
+
+    const unsubscribe = orderCountsRef.doc('counts').onSnapshot(snapshot =>{
+      const counts = snapshot.data() as {orderCounts: number}
+
+      setOrderCounts(counts.orderCounts)
+    })
+
+    return () => unsubscribe()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  return (
+    <OrderCountsStateContext.Provider value={{ orderCounts }}>
+      <OrderCountsDispatchContext.Provider value={{ setOrderCounts }}>
+        {children}
+      </OrderCountsDispatchContext.Provider>
+    </OrderCountsStateContext.Provider>
+  )
+}
+
+export default OrderCountsContextProvider
+
+export const useOrdersContext = () => {
+  const ordersState = useContext(OrderCountsStateContext)
+  const ordersDispatch = useContext(OrderCountsDispatchContext)
+
+  if (ordersState === undefined || ordersDispatch === undefined)
+    throw new Error(
+      'useOrdersContext must be used within OrderCountsContextProvider.'
+    )
+
+  return { ordersState, ordersDispatch }
+}

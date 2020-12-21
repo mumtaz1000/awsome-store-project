@@ -4,6 +4,7 @@ import { Switch, Route, Redirect } from 'react-router-dom'
 import Orders from '../pages/Orders'
 import OrderDetail from '../pages/OrderDetail'
 import PageNotFound from '../pages/PageNotFound'
+import OrdersContextProvider from '../state/orders-context'
 import { Role } from '../types'
 import { isClient } from '../helpers'
 
@@ -15,17 +16,19 @@ const OrderRoutes: React.FC<Props> = (props) => {
   if (!isClient(userRole)) return <Redirect to='/' />
 
   return (
-    <Switch>
-      <Route path='/orders/my-orders/:id'>
-        <OrderDetail />
-      </Route>
-      <Route path='/orders/my-orders'>
-        <Orders />
-      </Route>
-      <Route path='*'>
-        <PageNotFound />
-      </Route>
-    </Switch>
+    <OrdersContextProvider>
+      <Switch>
+        <Route path='/orders/my-orders/:id'>
+          <OrderDetail />
+        </Route>
+        <Route path='/orders/my-orders'>
+          <Orders />
+        </Route>
+        <Route path='*'>
+          <PageNotFound />
+        </Route>
+      </Switch>
+    </OrdersContextProvider>
   )
 }
 

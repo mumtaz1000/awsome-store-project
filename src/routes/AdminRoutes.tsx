@@ -6,6 +6,8 @@ import ManageOrders from '../pages/ManageOrders'
 import ManageOrderDetail from '../pages/ManageOrderDetail'
 import ManageUsers from '../pages/ManageUsers'
 import PageNotFound from '../pages/PageNotFound'
+import OrdersContextProvider from '../state/orders-context'
+import OrderCountsContextProvider from '../state/orderCounts-context'
 import { Role } from '../types'
 import { isAdmin } from '../helpers'
 
@@ -22,10 +24,16 @@ const AdminRoutes: React.FC<Props> = (props) => {
         <ManageProducts />
       </Route>
       <Route path='/admin/manage-orders/:id'>
-        <ManageOrderDetail />
+        <OrdersContextProvider>
+          <ManageOrderDetail />
+        </OrdersContextProvider>
       </Route>
       <Route path='/admin/manage-orders'>
-        <ManageOrders />
+        <OrdersContextProvider>
+          <OrderCountsContextProvider>
+            <ManageOrders />
+          </OrderCountsContextProvider>
+        </OrdersContextProvider>
       </Route>
       <Route path='/admin/manage-users'>
         <ManageUsers />

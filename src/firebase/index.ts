@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 
-import { UserInfo, Product, CartItem } from '../types'
+import { UserInfo, Product, CartItem, Order } from '../types'
 import { db, firebase, storageRef } from './config'
 
 export const usersRef = db.collection('users')
@@ -8,9 +8,10 @@ export const productsRef = db.collection('products')
 export const productCountsRef = db.collection('product-counts')
 export const cartRef = db.collection('cart')
 export const ordersRef = db.collection('orders')
+export const orderCountsRef = db.collection('order-counts')
 export const productImagesFolder = 'products'
 
-export const snapshotToDoc = <T extends UserInfo | Product | CartItem>(
+export const snapshotToDoc = <T extends UserInfo | Product | CartItem | Order>(
   doc: firebase.firestore.DocumentSnapshot<firebase.firestore.DocumentData>
 ) => {
   const docData = doc.data() as T
