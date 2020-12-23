@@ -1,12 +1,12 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import { Order } from '../types'
+import { Order } from '../../types'
 import {
   formatAmount,
   calculateCartAmount,
   calculateCartQuantity,
-} from '../helpers'
+} from '../../helpers'
 
 interface Props {
   order: Order

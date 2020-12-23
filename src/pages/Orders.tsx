@@ -1,7 +1,7 @@
 import React from 'react'
 
 import Spinner from '../components/Spinner'
-import OrderItem from '../components/OrderItem'
+import OrderItem from '../components/orders/OrderItem'
 import { useOrdersContext } from '../state/orders-context'
 
 interface Props {}

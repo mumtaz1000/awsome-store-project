@@ -10,7 +10,6 @@ interface Props {}
 
 const OrderDetail: React.FC<Props> = () => {
   const params = useParams<{ id: string }>()
-
   const { order, loading, error } = useQueryOrder(params.id)
 
   if (loading) return <Spinner color='grey' height={50} width={50} />

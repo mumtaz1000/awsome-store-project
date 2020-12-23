@@ -15,7 +15,7 @@ export const useQueryOrder = (orderId: string) => {
       next: (snapshot) => {
         if (!snapshot.exists) {
           setOrder(null)
-          setError('Order does not exist.')
+          setError('Order not found.')
           setLoading(false)
           return
         }
