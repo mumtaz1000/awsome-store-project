@@ -1,10 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, ChangeEvent } from 'react'
 
 import Button from '../Button'
 import { useUpdateShipmentStatus } from '../../hooks/useUpdateShipmentStatus'
 import { Order, ShipmentStatus } from '../../types'
 import { shipmentStatuses } from '../../helpers'
-import { ChangeEvent } from 'react'
 
 interface Props {
   order: Order
