@@ -32,6 +32,7 @@ const Button = forwardRef(
       <button
         ref={ref}
         className={`btn ${className}`}
+        disabled={disabled}
         style={{
           cursor: loading || disabled ? 'not-allowed' : undefined,
           height,

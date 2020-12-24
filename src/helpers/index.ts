@@ -1,4 +1,10 @@
-import { Role, ProductCategory, CartItem, PurchasedItem } from '../types'
+import {
+  Role,
+  ProductCategory,
+  CartItem,
+  PurchasedItem,
+  ShipmentStatus,
+} from '../types'
 
 export const isAdmin = (role: Role | null) =>
   role === 'ADMIN' || role === 'SUPER_ADMIN'
@@ -10,6 +16,14 @@ export const categories: ProductCategory[] = [
   'Shoes',
   'Watches',
   'Accessories',
+]
+
+export const shipmentStatuses: ShipmentStatus[] = [
+  'New',
+  'Preparing',
+  'Shipped',
+  'Delivered',
+  'Canceled',
 ]
 
 export const formatAmount = (amount: number) =>
