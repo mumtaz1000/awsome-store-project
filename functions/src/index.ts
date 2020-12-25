@@ -11,6 +11,9 @@ const productCountsDocument = 'counts'
 const ordersCollection = 'orders'
 const orderCountsCollection = 'order-counts'
 const orderCountsDocument = 'counts'
+const usersCollection = 'users'
+const userCountsCollection = 'user-counts'
+const userCountsDocument = 'counts'
 
 const stripe = new Stripe(env.stripe.secret_key, {
   apiVersion: '2020-08-27',
@@ -87,6 +90,34 @@ export const onSignup = functions.https.onCall(async (data, context) => {
     throw error
   }
 })
+
+export const onUserCreated = functions.firestore
+  .document(`${usersCollection}/{userId}`)
+  .onCreate(async (snapshot, context) => {
+    // Query the user-counts/counts from firestore
+    const countsData = await admin
+      .firestore()
+      .collection(userCountsCollection)
+      .doc(userCountsDocument)
+      .get()
+
+    if (!countsData.exists) {
+      // The first user has been created
+      return admin
+        .firestore()
+        .collection(userCountsCollection)
+        .doc(userCountsDocument)
+        .set({ userCounts: 1 })
+    } else {
+      const { userCounts } = countsData.data() as { userCounts: number }
+
+      return admin
+        .firestore()
+        .collection(userCountsCollection)
+        .doc(userCountsDocument)
+        .set({ userCounts: userCounts + 1 })
+    }
+  })
 
 export const onProductCreated = functions.firestore
   .document(`${productsCollection}/{productId}`)
