@@ -1,8 +1,15 @@
 import React from 'react'
 
-interface Props {}
+import { useFetchUsers } from '../hooks/useFetchUsers'
+import { UserInfo } from '../types'
 
-const ManageUsers: React.FC<Props> = () => {
+interface Props {
+  userInfo: UserInfo
+}
+
+const ManageUsers: React.FC<Props> = ({ userInfo }) => {
+  const { users, userCounts, loading, error } = useFetchUsers(userInfo)
+
   return <div>ManageUsers</div>
 }
 

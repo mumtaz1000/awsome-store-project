@@ -36,7 +36,7 @@ const AdminRoutes: React.FC<Props> = (props) => {
         </OrdersContextProvider>
       </Route>
       <Route path='/admin/manage-users'>
-        <ManageUsers />
+        <ManageUsers userInfo={userInfo} />
       </Route>
       <Route path='*'>
         <PageNotFound />

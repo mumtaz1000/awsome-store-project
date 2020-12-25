@@ -4,6 +4,7 @@ import { UserInfo, Product, CartItem, Order } from '../types'
 import { db, firebase, storageRef } from './config'
 
 export const usersRef = db.collection('users')
+export const userCountsRef = db.collection('user-counts')
 export const productsRef = db.collection('products')
 export const productCountsRef = db.collection('product-counts')
 export const cartRef = db.collection('cart')
