@@ -8,15 +8,15 @@ interface Props {}
 
 const PrivateRoute: React.FC<Props> = ({ children }) => {
   const {
-    authState: { authUser, userRole, authChecked },
+    authState: { authUser, userInfo, authChecked },
   } = useAuthContext()
 
   const location = useLocation()
 
-  if (!authChecked && (!authUser || !userRole))
+  if (!authChecked && (!authUser || !userInfo))
     return <Spinner color='grey' height={50} width={50} />
 
-  if (authChecked && (!authUser || !userRole))
+  if (authChecked && (!authUser || !userInfo))
     return (
       <Redirect
         to={{
@@ -31,7 +31,7 @@ const PrivateRoute: React.FC<Props> = ({ children }) => {
   return (
     <>
       {React.Children.map(children as ReactElement, (child) =>
-        React.cloneElement(child, { userRole })
+        React.cloneElement(child, { userInfo })
       )}
     </>
   )

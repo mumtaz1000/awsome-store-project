@@ -22,7 +22,7 @@ const ProductDetail: React.FC<Props> = () => {
     productsState: { products, loading, error },
   } = useProductsContext()
   const {
-    authState: { authUser, userRole },
+    authState: { authUser, userInfo },
   } = useAuthContext()
   const { setModalType } = useModalContext()
   const {
@@ -141,10 +141,10 @@ const ProductDetail: React.FC<Props> = () => {
             if (!authUser) {
               setModalType('signin')
               return
-            } else if (authUser && isAdmin(userRole)) {
+            } else if (authUser && userInfo && isAdmin(userInfo.role)) {
               alert('You are an admin user, you cannot proceed "Add To Cart".')
               return
-            } else if (authUser && isClient(userRole)) {
+            } else if (authUser && userInfo && isClient(userInfo.role)) {
               // Check if this item is already in the existing cart, and if it is, check it's cart quantity vs it's inventory
 
               const foundItem = cart

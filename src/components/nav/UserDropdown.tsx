@@ -16,7 +16,7 @@ interface Props {}
 
 const UserDropdown: React.FC<Props> = () => {
   const {
-    authState: { authUser, userRole },
+    authState: { authUser, userInfo },
     authDispatch,
   } = useAuthContext()
   const { signout } = useAuthenticate()
@@ -33,11 +33,14 @@ const UserDropdown: React.FC<Props> = () => {
         </div>
 
         {/* Admin user */}
-        {isAdmin(userRole) && <AdminDropdown />}
+        {userInfo && isAdmin(userInfo?.role) && <AdminDropdown />}
 
         {/* Client user */}
-        {(isClient(userRole) ||
-          (isAdmin(userRole) && viewMode === 'client')) && <ClientDropdown />}
+        {userInfo &&
+          (isClient(userInfo?.role) ||
+            (isAdmin(userInfo?.role) && viewMode === 'client')) && (
+            <ClientDropdown />
+          )}
 
         {/* Logout */}
         <div className='sidebar__section'>

@@ -5,15 +5,15 @@ import Orders from '../pages/Orders'
 import OrderDetail from '../pages/OrderDetail'
 import PageNotFound from '../pages/PageNotFound'
 import OrdersContextProvider from '../state/orders-context'
-import { Role } from '../types'
+import { UserInfo } from '../types'
 import { isClient } from '../helpers'
 
 interface Props {}
 
 const OrderRoutes: React.FC<Props> = (props) => {
-  const { userRole } = props as { userRole: Role | null }
+  const { userInfo } = props as { userInfo: UserInfo }
 
-  if (!isClient(userRole)) return <Redirect to='/' />
+  if (!isClient(userInfo.role)) return <Redirect to='/' />
 
   return (
     <OrdersContextProvider>

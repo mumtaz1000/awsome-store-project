@@ -7,7 +7,7 @@ import MyCart from '../pages/MyCart'
 import SelectAddress from '../pages/SelectAddress'
 import Checkout from '../pages/Checkout'
 import PageNotFound from '../pages/PageNotFound'
-import { Role } from '../types'
+import { UserInfo } from '../types'
 import { isClient } from '../helpers'
 
 interface Props {}
@@ -15,9 +15,9 @@ interface Props {}
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY!)
 
 const BuyRoutes: React.FC<Props> = (props) => {
-  const { userRole } = props as { userRole: Role | null }
+  const { userInfo } = props as { userInfo: UserInfo }
 
-  if (!isClient(userRole)) return <Redirect to='/' />
+  if (!isClient(userInfo.role)) return <Redirect to='/' />
 
   return (
     <Elements stripe={stripePromise}>

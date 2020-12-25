@@ -8,15 +8,15 @@ import ManageUsers from '../pages/ManageUsers'
 import PageNotFound from '../pages/PageNotFound'
 import OrdersContextProvider from '../state/orders-context'
 import OrderCountsContextProvider from '../state/orderCounts-context'
-import { Role } from '../types'
+import { UserInfo } from '../types'
 import { isAdmin } from '../helpers'
 
 interface Props {}
 
 const AdminRoutes: React.FC<Props> = (props) => {
-  const { userRole } = props as { userRole: Role | null }
+  const { userInfo } = props as { userInfo: UserInfo }
 
-  if (!isAdmin(userRole)) return <Redirect to='buy/my-cart' />
+  if (!isAdmin(userInfo?.role)) return <Redirect to='buy/my-cart' />
 
   return (
     <Switch>

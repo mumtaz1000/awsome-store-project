@@ -12,7 +12,7 @@ interface Props {}
 const LoggedInNav: React.FC<Props> = () => {
   const {
     authDispatch,
-    authState: { userRole },
+    authState: { userInfo },
   } = useAuthContext()
   const { viewMode } = useViewContext()
   const { cart } = useCartContext()
@@ -20,7 +20,7 @@ const LoggedInNav: React.FC<Props> = () => {
   return (
     <ul className='navbar'>
       <div className='navbar__lists'>
-        {(viewMode === 'client' || isClient(userRole)) && (
+        {(viewMode === 'client' || (userInfo && isClient(userInfo?.role))) && (
           <li className='list list--cart'>
             <NavLink to='/buy/my-cart'>
               <FontAwesomeIcon

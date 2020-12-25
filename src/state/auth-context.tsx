@@ -16,7 +16,7 @@ type FETCH_AUTH_USER = { type: 'FETCH_AUTH_USER'; payload: AuthUser | null }
 type OPEN_USER_DROPDOWN = { type: 'OPEN_USER_DROPDOWN'; payload: boolean }
 type FETCH_USER_INFO = { type: 'FETCH_USER_INFO'; payload: UserInfo | null }
 type SIGNOUT_REDIRECT = { type: 'SIGNOUT_REDIRECT'; payload: boolean }
-type SET_USER_ROLE = { type: 'SET_USER_ROLE'; payload: Role | null }
+// type SET_USER_ROLE = { type: 'SET_USER_ROLE'; payload: Role | null }
 type FINISH_AUTH_CHECK = { type: 'FINISH_AUTH_CHECK'; payload: boolean }
 
 type AuthActions =
@@ -24,7 +24,7 @@ type AuthActions =
   | OPEN_USER_DROPDOWN
   | FETCH_USER_INFO
   | SIGNOUT_REDIRECT
-  | SET_USER_ROLE
+  // | SET_USER_ROLE
   | FINISH_AUTH_CHECK
 
 type AuthState = {
@@ -32,7 +32,7 @@ type AuthState = {
   isUserDropdownOpen: boolean
   userInfo: UserInfo | null
   signoutRedirect: boolean
-  userRole: Role | null
+  // userRole: Role | null
   authChecked: boolean
 }
 
@@ -62,10 +62,10 @@ export const signoutRedirect = (redirect: boolean): SIGNOUT_REDIRECT => ({
   payload: redirect,
 })
 
-export const setUserRole = (role: Role | null): SET_USER_ROLE => ({
-  type: 'SET_USER_ROLE',
-  payload: role,
-})
+// export const setUserRole = (role: Role | null): SET_USER_ROLE => ({
+//   type: 'SET_USER_ROLE',
+//   payload: role,
+// })
 
 export const finishAuthCheck = (checked: boolean): FINISH_AUTH_CHECK => ({
   type: 'FINISH_AUTH_CHECK',
@@ -99,11 +99,11 @@ const authReducer = (state: AuthState, action: AuthActions): AuthState => {
         signoutRedirect: action.payload,
       }
 
-    case 'SET_USER_ROLE':
-      return {
-        ...state,
-        userRole: action.payload,
-      }
+    // case 'SET_USER_ROLE':
+    //   return {
+    //     ...state,
+    //     userRole: action.payload,
+    //   }
 
     case 'FINISH_AUTH_CHECK':
       return {
@@ -121,7 +121,7 @@ const initialState: AuthState = {
   isUserDropdownOpen: false,
   userInfo: null,
   signoutRedirect: false,
-  userRole: null,
+  // userRole: null,
   authChecked: false,
 }
 
@@ -132,17 +132,17 @@ const AuthContextProvider: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        user
-          .getIdTokenResult()
-          .then((result) => {
-            const role = result.claims.role as Role
-            authDispatch(setUserRole(role))
-          })
-          .catch(() => authDispatch(setUserRole(null)))
+        // user
+        //   .getIdTokenResult()
+        //   .then((result) => {
+        //     const role = result.claims.role as Role
+        //     authDispatch(setUserRole(role))
+        //   })
+        //   .catch(() => authDispatch(setUserRole(null)))
         authDispatch(fetchAuthUser(user))
       } else {
         authDispatch(fetchAuthUser(null))
-        authDispatch(setUserRole(null))
+        // authDispatch(setUserRole(null))
       }
 
       authDispatch(finishAuthCheck(true))
