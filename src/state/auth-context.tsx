@@ -6,7 +6,7 @@ import React, {
   useEffect,
 } from 'react'
 
-import { AuthUser, Role, UserInfo } from '../types'
+import { AuthUser, UserInfo } from '../types'
 import { auth } from '../firebase/config'
 import { usersRef, snapshotToDoc } from '../firebase'
 
