@@ -53,6 +53,7 @@ type Order = {
   totalQuantity: number
   user: { id: string; name: string }
 }
+type Role = 'SUPER_ADMIN' | 'CLIENT' | 'ADMIN'
 
 export const onSignup = functions.https.onCall(async (data, context) => {
   try {
@@ -86,6 +87,33 @@ export const onSignup = functions.https.onCall(async (data, context) => {
     if (!result) return
 
     return { message: 'User has been created on firestore.' }
+  } catch (error) {
+    throw error
+  }
+})
+
+export const updateUserRole = functions.https.onCall(async (data, context) => {
+  try {
+    if (!context.auth) throw new Error('Not authenticated')
+
+    const { userId, newRole } = data as { userId: string; newRole: Role }
+
+    // Check authorization
+    const adminUser = await admin.auth().getUser(context.auth.uid)
+
+    const { role } = adminUser.customClaims as { role: Role }
+
+    if (role !== 'SUPER_ADMIN') throw new Error('No authorization')
+
+    // Update the auth user (Authentication)
+    await admin.auth().setCustomUserClaims(userId, { role: newRole })
+
+    // Update the user in the users collection (firestore)
+    return admin
+      .firestore()
+      .collection(usersCollection)
+      .doc(userId)
+      .set({ role: newRole }, { merge: true })
   } catch (error) {
     throw error
   }
