@@ -1432,7 +1432,7 @@
 }
 
 /* Manage Users Page */
-.page__manage-users {
+.page--manage-users {
   width: 90%;
   text-align: center;
 }
@@ -1451,7 +1451,7 @@
 }
 
 @media screen and (max-width: 600px) {
-  .page__manage-users {
+  .page--manage-users {
     width: 100%;
   }
 }
