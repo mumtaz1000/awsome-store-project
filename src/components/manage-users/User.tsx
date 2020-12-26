@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Button from '../Button'
+import { useUpdateRole } from '../../hooks/useUpdateRole'
 import { UserInfo } from '../../types'
 
 interface Props {
@@ -10,11 +11,23 @@ interface Props {
 }
 
 const User: React.FC<Props> = ({
-  user: { username, email, createdAt, role },
+  user: { id, username, email, createdAt, role },
   admin,
 }) => {
   const [newRole, setNewRole] = useState(role)
   const [isEditing, setIsEditing] = useState(false)
+
+  const { updateRole, loading, error } = useUpdateRole()
+
+  const handleUpdateRole = async () => {
+    if (role === newRole) return
+
+    const finished = await updateRole(id, newRole)
+
+    if (finished) setIsEditing(false)
+
+    if (error) alert(error)
+  }
 
   return (
     <tr>
@@ -97,36 +110,47 @@ const User: React.FC<Props> = ({
       {/* Edit */}
       {admin.role === 'SUPER_ADMIN' && (
         <td className='table-cell'>
-          {role !== 'SUPER_ADMIN' && !isEditing ? (
-            <FontAwesomeIcon
-              icon={['fas', 'edit']}
-              size='1x'
-              style={{ cursor: 'pointer' }}
-              onClick={() => setIsEditing(true)}
-            />
-          ) : (
-            <div className='table__update-action'>
-              <Button
-                width='40%'
-                height='2rem'
-                className='btn--cancel'
-                style={{ fontSize: '1rem' }}
-                onClick={() => {
-                  setNewRole(role)
-                  setIsEditing(false)
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                width='40%'
-                height='2rem'
-                className='btn--confirm'
-                style={{ fontSize: '1rem' }}
-              >
-                Confirm
-              </Button>
-            </div>
+          {role !== 'SUPER_ADMIN' && (
+            <>
+              {!isEditing ? (
+                <FontAwesomeIcon
+                  icon={['fas', 'edit']}
+                  size='1x'
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setIsEditing(true)}
+                />
+              ) : (
+                <div className='table__update-action'>
+                  <Button
+                    width='40%'
+                    height='2rem'
+                    className='btn--cancel'
+                    style={{ fontSize: '1rem' }}
+                    onClick={() => {
+                      setNewRole(role)
+                      setIsEditing(false)
+                    }}
+                    disabled={loading}
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button
+                    width='40%'
+                    height='2rem'
+                    className='btn--confirm'
+                    style={{ fontSize: '1rem' }}
+                    onClick={handleUpdateRole}
+                    loading={loading}
+                    spinnerHeight={10}
+                    spinnerWidth={10}
+                    disabled={loading || role === newRole}
+                  >
+                    Confirm
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </td>
       )}
