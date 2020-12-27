@@ -1,6 +1,7 @@
 import * as functions from 'firebase-functions'
 import * as admin from 'firebase-admin'
 import Stripe from 'stripe'
+import algoliasearch from 'algoliasearch'
 
 admin.initializeApp()
 
@@ -20,7 +21,12 @@ const stripe = new Stripe(env.stripe.secret_key, {
   typescript: true,
 })
 
-// product-counts --> counts --> { All: 10, Clothing: 3, Shoes: 2, Watched: 2, Accessories: 3 }
+const algoliaClient = algoliasearch(
+  env.algolia.app_id,
+  env.algolia.admin_api_key
+)
+
+const usersIndex = algoliaClient.initIndex('users')
 
 type ProductCategory = 'Clothing' | 'Shoes' | 'Watches' | 'Accessories'
 type Counts = {
@@ -109,11 +115,13 @@ export const updateUserRole = functions.https.onCall(async (data, context) => {
     await admin.auth().setCustomUserClaims(userId, { role: newRole })
 
     // Update the user in the users collection (firestore)
-    return admin
-      .firestore()
-      .collection(usersCollection)
-      .doc(userId)
-      .set({ role: newRole }, { merge: true })
+    return admin.firestore().collection(usersCollection).doc(userId).set(
+      {
+        role: newRole,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    )
   } catch (error) {
     throw error
   }
@@ -122,6 +130,8 @@ export const updateUserRole = functions.https.onCall(async (data, context) => {
 export const onUserCreated = functions.firestore
   .document(`${usersCollection}/{userId}`)
   .onCreate(async (snapshot, context) => {
+    const user = snapshot.data()
+
     // Query the user-counts/counts from firestore
     const countsData = await admin
       .firestore()
@@ -131,7 +141,7 @@ export const onUserCreated = functions.firestore
 
     if (!countsData.exists) {
       // The first user has been created
-      return admin
+      await admin
         .firestore()
         .collection(userCountsCollection)
         .doc(userCountsDocument)
@@ -139,12 +149,55 @@ export const onUserCreated = functions.firestore
     } else {
       const { userCounts } = countsData.data() as { userCounts: number }
 
-      return admin
+      await admin
         .firestore()
         .collection(userCountsCollection)
         .doc(userCountsDocument)
         .set({ userCounts: userCounts + 1 })
     }
+
+    // Create a new user object in Algolia
+    return usersIndex.saveObject({
+      objectID: snapshot.id,
+      ...user,
+    })
+  })
+
+export const onUserUpdated = functions.firestore
+  .document(`${usersCollection}/{userId}`)
+  .onUpdate(async (snapshot, context) => {
+    const user = snapshot.after.data()
+
+    return usersIndex.saveObject({
+      objectID: snapshot.after.id,
+      ...user,
+    })
+  })
+
+export const onUserDeleted = functions.firestore
+  .document(`${usersCollection}/{userId}`)
+  .onDelete(async (snapshot, context) => {
+    // Query the user-counts/counts from firestore
+    const countsData = await admin
+      .firestore()
+      .collection(userCountsCollection)
+      .doc(userCountsDocument)
+      .get()
+
+    if (!countsData.exists) {
+      // The first user has been created
+      return
+    } else {
+      const { userCounts } = countsData.data() as { userCounts: number }
+
+      await admin
+        .firestore()
+        .collection(userCountsCollection)
+        .doc(userCountsDocument)
+        .set({ userCounts: userCounts >= 1 ? userCounts - 1 : 0 })
+    }
+
+    return usersIndex.deleteObject(snapshot.id)
   })
 
 export const onProductCreated = functions.firestore
