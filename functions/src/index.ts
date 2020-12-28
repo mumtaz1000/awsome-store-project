@@ -26,7 +26,10 @@ const algoliaClient = algoliasearch(
   env.algolia.admin_api_key
 )
 
+// Create the indices on Algolia
 const usersIndex = algoliaClient.initIndex('users')
+const productsIndex = algoliaClient.initIndex('products')
+const ordersIndex = algoliaClient.initIndex('orders')
 
 type ProductCategory = 'Clothing' | 'Shoes' | 'Watches' | 'Accessories'
 type Counts = {
@@ -245,11 +248,16 @@ export const onProductCreated = functions.firestore
     }
 
     // Update the counts document in the product-counts collection
-    return admin
+    await admin
       .firestore()
       .collection(productCountsCollection)
       .doc(productCountsDocument)
       .set(counts)
+
+    return productsIndex.saveObject({
+      objectID: snapshot.id,
+      ...product,
+    })
   })
 
 export const onProductUpdated = functions.firestore
@@ -277,11 +285,16 @@ export const onProductUpdated = functions.firestore
     counts[beforeProd.category] = counts[beforeProd.category] - 1
     counts[afterProd.category] = counts[afterProd.category] + 1
 
-    return admin
+    await admin
       .firestore()
       .collection(productCountsCollection)
       .doc(productCountsDocument)
       .set(counts)
+
+    return productsIndex.saveObject({
+      objectID: snapshot.after.id,
+      ...afterProd,
+    })
   })
 
 export const onProductDeleted = functions.firestore
@@ -304,11 +317,13 @@ export const onProductDeleted = functions.firestore
     counts.All = counts.All - 1
     counts[product.category] = counts[product.category] - 1
 
-    return admin
+    await admin
       .firestore()
       .collection(productCountsCollection)
       .doc(productCountsDocument)
       .set(counts)
+
+    return productsIndex.deleteObject(snapshot.id)
   })
 
 export const onOrderCreated = functions.firestore
@@ -354,7 +369,7 @@ export const onOrderCreated = functions.firestore
     if (!countsData.exists) {
       // The first order, create a new counts document
 
-      return admin
+      await admin
         .firestore()
         .collection(orderCountsCollection)
         .doc(orderCountsDocument)
@@ -363,12 +378,34 @@ export const onOrderCreated = functions.firestore
       // Found the counts document, update it
       const counts = countsData.data() as { orderCounts: number }
 
-      return admin
+      await admin
         .firestore()
         .collection(orderCountsCollection)
         .doc(orderCountsDocument)
         .set({ orderCounts: counts.orderCounts + 1 })
     }
+
+    return ordersIndex.saveObject({
+      objectID: snapshot.id,
+      ...order,
+    })
+  })
+
+export const onOrderUpdated = functions.firestore
+  .document(`${ordersCollection}/{orderId}`)
+  .onUpdate(async (snapshot, context) => {
+    const updatedOrder = snapshot.after.data()
+
+    return ordersIndex.saveObject({
+      objectID: snapshot.after.id,
+      ...updatedOrder,
+    })
+  })
+
+export const onOrderDeleted = functions.firestore
+  .document(`${ordersCollection}/{orderId}`)
+  .onDelete(async (snapshot, context) => {
+    return ordersIndex.deleteObject(snapshot.id)
   })
 
 export const createPaymentIntents = functions.https.onCall(
