@@ -267,29 +267,28 @@ export const onProductUpdated = functions.firestore
     const afterProd = snapshot.after.data() as Product
 
     // Check if the category has been changed
-    // A. The category isn't changed
-    if (beforeProd.category === afterProd.category) return
+    if (beforeProd.category !== afterProd.category) {
+      // B. The category is changed
+      const countsData = await admin
+        .firestore()
+        .collection(productCountsCollection)
+        .doc(productCountsDocument)
+        .get()
 
-    // B. The category is changed
-    const countsData = await admin
-      .firestore()
-      .collection(productCountsCollection)
-      .doc(productCountsDocument)
-      .get()
+      if (!countsData.exists) return
 
-    if (!countsData.exists) return
+      const counts = countsData.data() as Counts
 
-    const counts = countsData.data() as Counts
+      // Update the counts object
+      counts[beforeProd.category] = counts[beforeProd.category] - 1
+      counts[afterProd.category] = counts[afterProd.category] + 1
 
-    // Update the counts object
-    counts[beforeProd.category] = counts[beforeProd.category] - 1
-    counts[afterProd.category] = counts[afterProd.category] + 1
-
-    await admin
-      .firestore()
-      .collection(productCountsCollection)
-      .doc(productCountsDocument)
-      .set(counts)
+      await admin
+        .firestore()
+        .collection(productCountsCollection)
+        .doc(productCountsDocument)
+        .set(counts)
+    }
 
     return productsIndex.saveObject({
       objectID: snapshot.after.id,

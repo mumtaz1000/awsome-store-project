@@ -1,5 +1,6 @@
 import { useAsyncCall } from './useAsyncCall'
 import { ShipmentStatus } from '../types'
+import { firebase } from '../firebase/config'
 import { ordersRef } from '../firebase'
 
 export const useUpdateShipmentStatus = () => {
@@ -9,9 +10,13 @@ export const useUpdateShipmentStatus = () => {
     try {
       setLoading(true)
 
-      await ordersRef
-        .doc(orderId)
-        .set({ shipmentStatus: newStatus }, { merge: true })
+      await ordersRef.doc(orderId).set(
+        {
+          shipmentStatus: newStatus,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        },
+        { merge: true }
+      )
       setLoading(false)
 
       return true
