@@ -240,227 +240,214 @@ const Checkout: React.FC<Props> = () => {
       <div className='payment'>
         <h2 className='header'>Select a payment card</h2>
 
-        {fetchCardsLoading ? (
-          <Spinner color='grey' height={30} width={30} />
-        ) : (
-          <form className='form' onSubmit={handleCompletePayment}>
-            {/* Saved Cards */}
-            {userCards?.data &&
-              userCards.data.length > 0 &&
-              userCards.data.map((method) => (
-                <label key={method.id} className='card' htmlFor={method.id}>
-                  <input
-                    type='radio'
-                    name='card'
-                    value={method.id}
-                    style={{ width: '10%' }}
-                    checked={
-                      useCard.type === 'saved' &&
-                      useCard.payment_method === method.id
-                    }
-                    onChange={() => {
-                      setUseCard({ type: 'saved', payment_method: method.id })
-                      setDisabled(false)
-                      reset()
-                    }}
-                  />
-
-                  <p className='paragraph' style={{ width: '40%' }}>
-                    **** **** **** {method.card?.last4}
-                  </p>
-
-                  <p className='paragraph' style={{ width: '10%' }}>
-                    {method.card?.brand === 'visa' ? (
-                      <FontAwesomeIcon
-                        icon={['fab', 'cc-visa']}
-                        size='2x'
-                        color='#206CAB'
-                      />
-                    ) : method.card?.brand === 'mastercard' ? (
-                      <FontAwesomeIcon
-                        icon={['fab', 'cc-mastercard']}
-                        size='2x'
-                        color='#EB2230'
-                      />
-                    ) : method.card?.brand === 'amex' ? (
-                      <FontAwesomeIcon
-                        icon={['fab', 'cc-amex']}
-                        size='2x'
-                        color='#099DD9'
-                      />
-                    ) : (
-                      method.card?.brand
-                    )}
-                  </p>
-
-                  <div style={{ width: '30%' }}>
-                    {method.id ===
-                    stripeCustomer?.invoice_settings.default_payment_method ? (
-                      <p className='paragraph--center paragraph--focus'>
-                        Default
-                      </p>
-                    ) : useCard.type === 'saved' &&
-                      useCard.payment_method === method.id ? (
-                      <div>
-                        <input
-                          type='checkbox'
-                          name='setDefault'
-                          ref={register}
-                        />
-                        <label
-                          htmlFor='setDefault'
-                          className='set-default-card'
-                        >
-                          Set as default
-                        </label>
-                      </div>
-                    ) : undefined}
-                  </div>
-
-                  <p
-                    className='paragraph'
-                    style={{ width: '10%', cursor: 'pointer' }}
-                    onClick={() => {
-                      setCardToDelete(method)
-                      setOpenDialog(true)
-                      setDialogType('remove_card')
-                    }}
-                  >
-                    <FontAwesomeIcon
-                      icon={['fas', 'trash-alt']}
-                      size='1x'
-                      color='red'
-                    />
-                  </p>
-                </label>
-              ))}
-
-            {/* New Card */}
-            <div className='form--new-card'>
-              <label htmlFor='newCard' className='card card--new'>
+        <form className='form' onSubmit={handleCompletePayment}>
+          {/* Saved Cards */}
+          {fetchCardsLoading ? (
+            <Spinner color='grey' height={30} width={30} />
+          ) : (
+            userCards?.data &&
+            userCards.data.length > 0 &&
+            userCards.data.map((method) => (
+              <label key={method.id} className='card' htmlFor={method.id}>
                 <input
                   type='radio'
                   name='card'
-                  checked={useCard.type === 'new'}
+                  value={method.id}
                   style={{ width: '10%' }}
+                  checked={
+                    useCard.type === 'saved' &&
+                    useCard.payment_method === method.id
+                  }
                   onChange={() => {
-                    setUseCard({ type: 'new' })
-                    setDisabled(true)
+                    setUseCard({ type: 'saved', payment_method: method.id })
+                    setDisabled(false)
                     reset()
                   }}
                 />
 
-                <h4
-                  className='paragraph paragraph--bold'
-                  style={{ width: '30%' }}
-                >
-                  Use new card
-                </h4>
-
-                <p className='paragraph' style={{ width: '5%' }}>
-                  {' '}
+                <p className='paragraph' style={{ width: '40%' }}>
+                  **** **** **** {method.card?.last4}
                 </p>
-
-                <div className='new-card__logo' style={{ width: '45%' }}>
-                  <FontAwesomeIcon
-                    icon={['fab', 'cc-visa']}
-                    size='1x'
-                    style={{ margin: '0 0.5rem' }}
-                    color='#206CAB'
-                  />
-                  <FontAwesomeIcon
-                    icon={['fab', 'cc-mastercard']}
-                    size='1x'
-                    style={{ margin: '0 0.5rem' }}
-                    color='#EB2230'
-                  />
-                  <FontAwesomeIcon
-                    icon={['fab', 'cc-amex']}
-                    size='1x'
-                    style={{ margin: '0 0.5rem' }}
-                    color='#099DD9'
-                  />
-                </div>
 
                 <p className='paragraph' style={{ width: '10%' }}>
-                  {' '}
+                  {method.card?.brand === 'visa' ? (
+                    <FontAwesomeIcon
+                      icon={['fab', 'cc-visa']}
+                      size='2x'
+                      color='#206CAB'
+                    />
+                  ) : method.card?.brand === 'mastercard' ? (
+                    <FontAwesomeIcon
+                      icon={['fab', 'cc-mastercard']}
+                      size='2x'
+                      color='#EB2230'
+                    />
+                  ) : method.card?.brand === 'amex' ? (
+                    <FontAwesomeIcon
+                      icon={['fab', 'cc-amex']}
+                      size='2x'
+                      color='#099DD9'
+                    />
+                  ) : (
+                    method.card?.brand
+                  )}
                 </p>
-              </label>
 
-              {useCard.type === 'new' && (
-                <div className='new-card__form'>
-                  <div className='form__input-container form__input-container--card'>
-                    <input
-                      type='text'
-                      className='input input--card-name'
-                      name='cardName'
-                      placeholder='Name on card'
-                      ref={register({ required: 'Card name is required.' })}
-                    />
-
-                    {errors.cardName && (
-                      <p className='paragraph paragraph--small paragraph--error'>
-                        {errors.cardName.message}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className='form__input-container form__input-container--card'>
-                    <CardElement
-                      options={{
-                        style: {
-                          base: { color: 'blue', iconColor: 'blue' },
-                          invalid: { color: 'red', iconColor: 'red' },
-                        },
-                      }}
-                      onChange={handleCardChange}
-                    />
-
-                    {newCardError && (
-                      <p className='paragraph paragraph--error'>
-                        {newCardError}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className='form__set-new-card'>
-                    <div className='form__input-container'>
-                      <input
-                        type='checkbox'
-                        name='save'
-                        ref={register}
-                        onClick={() => setOpenSetDefault((prev) => !prev)}
-                      />
-                      <label htmlFor='saveCard' className='paragraph'>
-                        Save this card
+                <div style={{ width: '30%' }}>
+                  {method.id ===
+                  stripeCustomer?.invoice_settings.default_payment_method ? (
+                    <p className='paragraph--center paragraph--focus'>
+                      Default
+                    </p>
+                  ) : useCard.type === 'saved' &&
+                    useCard.payment_method === method.id ? (
+                    <div>
+                      <input type='checkbox' name='setDefault' ref={register} />
+                      <label htmlFor='setDefault' className='set-default-card'>
+                        Set as default
                       </label>
                     </div>
-
-                    {openSetDefault && (
-                      <div className='form__input-container'>
-                        <input
-                          type='checkbox'
-                          name='setDefault'
-                          ref={register}
-                        />
-                        <label htmlFor='setDefault' className='paragraph'>
-                          Set as default
-                        </label>
-                      </div>
-                    )}
-                  </div>
+                  ) : undefined}
                 </div>
-              )}
-            </div>
 
-            {/* Hidden Button */}
-            <button
-              ref={btnRef}
-              style={{ display: 'none' }}
-              disabled={!stripe || !useCard || disabled || loading}
-            ></button>
-          </form>
-        )}
+                <p
+                  className='paragraph'
+                  style={{ width: '10%', cursor: 'pointer' }}
+                  onClick={() => {
+                    setCardToDelete(method)
+                    setOpenDialog(true)
+                    setDialogType('remove_card')
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={['fas', 'trash-alt']}
+                    size='1x'
+                    color='red'
+                  />
+                </p>
+              </label>
+            ))
+          )}
+
+          {/* New Card */}
+          <div className='form--new-card'>
+            <label htmlFor='newCard' className='card card--new'>
+              <input
+                type='radio'
+                name='card'
+                checked={useCard.type === 'new'}
+                style={{ width: '10%' }}
+                onChange={() => {
+                  setUseCard({ type: 'new' })
+                  setDisabled(true)
+                  reset()
+                }}
+              />
+
+              <h4
+                className='paragraph paragraph--bold'
+                style={{ width: '30%' }}
+              >
+                Use new card
+              </h4>
+
+              <p className='paragraph' style={{ width: '5%' }}>
+                {' '}
+              </p>
+
+              <div className='new-card__logo' style={{ width: '45%' }}>
+                <FontAwesomeIcon
+                  icon={['fab', 'cc-visa']}
+                  size='1x'
+                  style={{ margin: '0 0.5rem' }}
+                  color='#206CAB'
+                />
+                <FontAwesomeIcon
+                  icon={['fab', 'cc-mastercard']}
+                  size='1x'
+                  style={{ margin: '0 0.5rem' }}
+                  color='#EB2230'
+                />
+                <FontAwesomeIcon
+                  icon={['fab', 'cc-amex']}
+                  size='1x'
+                  style={{ margin: '0 0.5rem' }}
+                  color='#099DD9'
+                />
+              </div>
+
+              <p className='paragraph' style={{ width: '10%' }}>
+                {' '}
+              </p>
+            </label>
+
+            {useCard.type === 'new' && (
+              <div className='new-card__form'>
+                <div className='form__input-container form__input-container--card'>
+                  <input
+                    type='text'
+                    className='input input--card-name'
+                    name='cardName'
+                    placeholder='Name on card'
+                    ref={register({ required: 'Card name is required.' })}
+                  />
+
+                  {errors.cardName && (
+                    <p className='paragraph paragraph--small paragraph--error'>
+                      {errors.cardName.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className='form__input-container form__input-container--card'>
+                  <CardElement
+                    options={{
+                      style: {
+                        base: { color: 'blue', iconColor: 'blue' },
+                        invalid: { color: 'red', iconColor: 'red' },
+                      },
+                    }}
+                    onChange={handleCardChange}
+                  />
+
+                  {newCardError && (
+                    <p className='paragraph paragraph--error'>{newCardError}</p>
+                  )}
+                </div>
+
+                <div className='form__set-new-card'>
+                  <div className='form__input-container'>
+                    <input
+                      type='checkbox'
+                      name='save'
+                      ref={register}
+                      onClick={() => setOpenSetDefault((prev) => !prev)}
+                    />
+                    <label htmlFor='saveCard' className='paragraph'>
+                      Save this card
+                    </label>
+                  </div>
+
+                  {openSetDefault && (
+                    <div className='form__input-container'>
+                      <input type='checkbox' name='setDefault' ref={register} />
+                      <label htmlFor='setDefault' className='paragraph'>
+                        Set as default
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Hidden Button */}
+          <button
+            ref={btnRef}
+            style={{ display: 'none' }}
+            disabled={!stripe || !useCard || disabled || loading}
+          ></button>
+        </form>
 
         {error && <p className='paragraph paragraph--error'>{error}</p>}
 
