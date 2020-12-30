@@ -6,6 +6,7 @@ import Button from '../Button'
 import LoggedOutNav from './LoggedOutNav'
 import LoggedInNav from './LoggedInNav'
 import { useAuthContext } from '../../state/auth-context'
+import { useSearchProducts } from '../../hooks/useSearchProducts'
 
 interface Props {}
 
@@ -16,6 +17,8 @@ const MainNav: React.FC<Props> = () => {
 
   const [searchString, setSearchString] = useState('')
 
+  const { searchProducts, loading, error } = useSearchProducts()
+
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) =>
     setSearchString(e.target.value)
 
@@ -25,10 +28,17 @@ const MainNav: React.FC<Props> = () => {
     }
   }
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchString) return
 
-    console.log(searchString)
+    const hits = await searchProducts(searchString)
+
+    if (!hits) {
+      if (error) alert(error)
+      return
+    }
+
+    console.log(hits)
   }
 
   return (
