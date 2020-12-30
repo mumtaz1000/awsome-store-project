@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useState, ChangeEvent, KeyboardEvent } from 'react'
 import { NavLink } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Button from '../Button'
 import LoggedOutNav from './LoggedOutNav'
@@ -13,6 +14,23 @@ const MainNav: React.FC<Props> = () => {
     authState: { authUser },
   } = useAuthContext()
 
+  const [searchString, setSearchString] = useState('')
+
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setSearchString(e.target.value)
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      return handleSearch()
+    }
+  }
+
+  const handleSearch = () => {
+    if (!searchString) return
+
+    console.log(searchString)
+  }
+
   return (
     <header className='head'>
       <div className='head__section'>
@@ -24,9 +42,28 @@ const MainNav: React.FC<Props> = () => {
 
         <div className='head__search'>
           <div className='search-input'>
-            <input type='text' className='search' placeholder='Search' />
+            <input
+              type='text'
+              className='search'
+              placeholder='Search'
+              value={searchString}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+            />
+
+            {searchString && (
+              <FontAwesomeIcon
+                icon={['fas', 'times']}
+                size='lg'
+                color='grey'
+                className='clear-search'
+                onClick={() => setSearchString('')}
+              />
+            )}
           </div>
-          <Button className='btn--search'>SEARCH</Button>
+          <Button className='btn--search' onClick={handleSearch}>
+            SEARCH
+          </Button>
         </div>
 
         <nav className='head__navbar'>

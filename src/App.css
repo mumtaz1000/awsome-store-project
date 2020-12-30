@@ -1398,6 +1398,7 @@
 
 /* Add Product Form */
 .modal--add-product {
+  position: fixed;
   width: 35%;
 }
 
@@ -1427,6 +1428,7 @@
   }
 
   .modal--add-product {
+    position: fixed;
     width: 90%;
   }
 }
