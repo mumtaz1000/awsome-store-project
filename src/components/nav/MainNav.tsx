@@ -6,7 +6,9 @@ import Button from '../Button'
 import LoggedOutNav from './LoggedOutNav'
 import LoggedInNav from './LoggedInNav'
 import { useAuthContext } from '../../state/auth-context'
+import { useProductsContext } from '../../state/products-context'
 import { useSearchProducts } from '../../hooks/useSearchProducts'
+import { firebase } from '../../firebase/config'
 
 interface Props {}
 
@@ -14,6 +16,9 @@ const MainNav: React.FC<Props> = () => {
   const {
     authState: { authUser },
   } = useAuthContext()
+  const {
+    productsDispatch: { setSearchedProducts },
+  } = useProductsContext()
 
   const [searchString, setSearchString] = useState('')
 
@@ -38,7 +43,21 @@ const MainNav: React.FC<Props> = () => {
       return
     }
 
-    console.log(hits)
+    const products = hits.map((item) => {
+      const createdAt = firebase.firestore.Timestamp.fromDate(
+        new Date(item.createdAt._seconds * 1000)
+      )
+
+      const updatedAt = item.updatedAt
+        ? firebase.firestore.Timestamp.fromDate(
+            new Date(item.updatedAt._seconds * 1000)
+          )
+        : undefined
+
+      return { ...item, id: item.objectID, createdAt, updatedAt }
+    })
+
+    setSearchedProducts(products)
   }
 
   return (
@@ -67,7 +86,10 @@ const MainNav: React.FC<Props> = () => {
                 size='lg'
                 color='grey'
                 className='clear-search'
-                onClick={() => setSearchString('')}
+                onClick={() => {
+                  setSearchString('')
+                  setSearchedProducts(null)
+                }}
               />
             )}
           </div>

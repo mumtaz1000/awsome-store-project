@@ -29,9 +29,11 @@ type ProductsState = {
   productCounts: ProductCounts
   loading: boolean
   error: string
+  searchedProducts: Product[] | null
 }
 type ProductsDispatch = {
   setProducts: Dispatch<SetStateAction<Products>>
+  setSearchedProducts: Dispatch<SetStateAction<Product[] | null>>
 }
 
 const ProductsStateContext = createContext<ProductsState | undefined>(undefined)
@@ -59,6 +61,9 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
   const { loading, setLoading, error, setError } = useAsyncCall()
   const [products, setProducts] = useState(initialProducts)
   const [productCounts, setProductCounts] = useState(initialProductCounts)
+  const [searchedProducts, setSearchedProducts] = useState<Product[] | null>(
+    null
+  )
 
   // Fetch the products collection from firestore
   useEffect(() => {
@@ -114,9 +119,11 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
 
   return (
     <ProductsStateContext.Provider
-      value={{ products, productCounts, loading, error }}
+      value={{ products, productCounts, loading, error, searchedProducts }}
     >
-      <ProductsDispatchContext.Provider value={{ setProducts }}>
+      <ProductsDispatchContext.Provider
+        value={{ setProducts, setSearchedProducts }}
+      >
         {children}
       </ProductsDispatchContext.Provider>
     </ProductsStateContext.Provider>

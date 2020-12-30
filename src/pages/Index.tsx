@@ -15,7 +15,7 @@ const Index: React.FC<Props> = () => {
     authState: { authUser, signoutRedirect },
   } = useAuthContext()
   const {
-    productsState: { products, loading },
+    productsState: { products, loading, searchedProducts },
   } = useProductsContext()
 
   const history = useHistory<{ from: string }>()
@@ -41,9 +41,21 @@ const Index: React.FC<Props> = () => {
   return (
     <div className='page--products'>
       <div className='products'>
-        {products.All.map((product) => (
-          <ProductItem key={product.id} product={product} />
-        ))}
+        {searchedProducts ? (
+          <>
+            {searchedProducts.length < 1 ? (
+              <h2 className='header--center'>No products found.</h2>
+            ) : (
+              searchedProducts.map((product) => (
+                <ProductItem key={product.id} product={product} />
+              ))
+            )}
+          </>
+        ) : (
+          products.All.map((product) => (
+            <ProductItem key={product.id} product={product} />
+          ))
+        )}
       </div>
     </div>
   )
