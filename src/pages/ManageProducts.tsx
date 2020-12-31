@@ -6,6 +6,7 @@ import Spinner from '../components/Spinner'
 import AddAndEditProduct from '../components/manage-products/AddAndEditProduct'
 import AlertDialog from '../components/dialogs/AlertDialog'
 import { useProductsContext } from '../state/products-context'
+import {useSearchContext} from '../state/search-context'
 import { useManageProduct } from '../hooks/useManageProduct'
 import { useDialog } from '../hooks/useDialog'
 import { Product } from '../types'
@@ -17,8 +18,9 @@ const ManageProducts: React.FC<Props> = () => {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null)
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
   const {
-    productsState: { products, loading, error, searchedProducts },
+    productsState: { products, loading, error },
   } = useProductsContext()
+  const {searchedItems} = useSearchContext()
   const { openDialog, setOpenDialog } = useDialog()
   const {
     deleteProduct,
@@ -65,16 +67,16 @@ const ManageProducts: React.FC<Props> = () => {
             </thead>
 
             <tbody>
-              {searchedProducts ? (
+              {searchedItems ? (
                 <>
-                  {searchedProducts.length < 1 ? (
+                  {searchedItems.length < 1 ? (
                     <tr>
                       <td colSpan={6}>
                         <h2 className='header--center'>No products found.</h2>
                       </td>
                     </tr>
                   ) : (
-                    searchedProducts.map((product) => (
+                    (searchedItems as Product[]).map((product) => (
                       <AdminProductItem
                         key={product.id}
                         product={product}

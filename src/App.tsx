@@ -7,6 +7,7 @@ import AuthContextProvider from './state/auth-context'
 import ModalContextProvider from './state/modal-context'
 import ProductsContextProvider from './state/products-context'
 import CartContextProvider from './state/cart-context'
+import SearchContextProvider from './state/search-context'
 
 import './App.css'
 import './fontawesome'
@@ -14,17 +15,19 @@ import './fontawesome'
 function App() {
   return (
     <AuthContextProvider>
-      <ModalContextProvider>
-        <ProductsContextProvider>
-          <CartContextProvider>
-            <BrowserRouter>
-              <Layout>
-                <Routes />
-              </Layout>
-            </BrowserRouter>
-          </CartContextProvider>
-        </ProductsContextProvider>
-      </ModalContextProvider>
+      <SearchContextProvider>
+        <ModalContextProvider>
+          <ProductsContextProvider>
+            <CartContextProvider>
+              <BrowserRouter>
+                <Layout>
+                  <Routes />
+                </Layout>
+              </BrowserRouter>
+            </CartContextProvider>
+          </ProductsContextProvider>
+        </ModalContextProvider>
+      </SearchContextProvider>
     </AuthContextProvider>
   )
 }

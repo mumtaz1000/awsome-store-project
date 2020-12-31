@@ -6,7 +6,7 @@ import Button from '../Button'
 import LoggedOutNav from './LoggedOutNav'
 import LoggedInNav from './LoggedInNav'
 import { useAuthContext } from '../../state/auth-context'
-import { useProductsContext } from '../../state/products-context'
+import { useSearchContext } from '../../state/search-context'
 import { useSearchItems } from '../../hooks/useSearchItems'
 
 interface Props {}
@@ -15,9 +15,7 @@ const MainNav: React.FC<Props> = () => {
   const {
     authState: { authUser },
   } = useAuthContext()
-  const {
-    productsDispatch: { setSearchedProducts },
-  } = useProductsContext()
+  const { setSearchedItems } = useSearchContext()
 
   const [searchString, setSearchString] = useState('')
 
@@ -26,8 +24,8 @@ const MainNav: React.FC<Props> = () => {
   const { searchItems, loading, error } = useSearchItems(location.pathname)
 
   useEffect(() => {
-    if (!searchString) setSearchedProducts(null)
-  }, [searchString, setSearchedProducts])
+    if (!searchString) setSearchedItems(null)
+  }, [searchString, setSearchedItems])
 
   useEffect(() => {
     if (error) alert(error)
@@ -76,7 +74,7 @@ const MainNav: React.FC<Props> = () => {
                 className='clear-search'
                 onClick={() => {
                   setSearchString('')
-                  setSearchedProducts(null)
+                  setSearchedItems(null)
                 }}
               />
             )}

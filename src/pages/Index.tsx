@@ -6,6 +6,8 @@ import Spinner from '../components/Spinner'
 import { useAuthContext } from '../state/auth-context'
 import { useModalContext } from '../state/modal-context'
 import { useProductsContext } from '../state/products-context'
+import {useSearchContext} from '../state/search-context'
+import { Product } from '../types'
 
 interface Props {}
 
@@ -15,8 +17,9 @@ const Index: React.FC<Props> = () => {
     authState: { authUser, signoutRedirect },
   } = useAuthContext()
   const {
-    productsState: { products, loading, searchedProducts },
+    productsState: { products, loading },
   } = useProductsContext()
+  const {searchedItems} = useSearchContext()
 
   const history = useHistory<{ from: string }>()
   const { state } = history.location
@@ -41,12 +44,12 @@ const Index: React.FC<Props> = () => {
   return (
     <div className='page--products'>
       <div className='products'>
-        {searchedProducts ? (
+        {searchedItems ? (
           <>
-            {searchedProducts.length < 1 ? (
+            {searchedItems.length < 1 ? (
               <h2 className='header--center'>No products found.</h2>
             ) : (
-              searchedProducts.map((product) => (
+              (searchedItems as Product[]).map((product) => (
                 <ProductItem key={product.id} product={product} />
               ))
             )}
