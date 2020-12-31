@@ -2,6 +2,7 @@ import React from 'react'
 
 import Spinner from '../components/Spinner'
 import User from '../components/manage-users/User'
+import { useSearchContext } from '../state/search-context'
 import { useFetchUsers } from '../hooks/useFetchUsers'
 import { UserInfo } from '../types'
 
@@ -11,6 +12,7 @@ interface Props {
 
 const ManageUsers: React.FC<Props> = ({ userInfo }) => {
   const { users, userCounts, loading, error } = useFetchUsers(userInfo)
+  const { searchedItems } = useSearchContext()
 
   if (loading) return <Spinner color='grey' height={50} width={50} />
 
@@ -51,9 +53,25 @@ const ManageUsers: React.FC<Props> = ({ userInfo }) => {
         </thead>
 
         <tbody>
-          {users.map((user) => (
-            <User key={user.id} user={user} admin={userInfo} />
-          ))}
+          {searchedItems ? (
+            <>
+              {searchedItems.length < 1 ? (
+                <tr>
+                  <td colSpan={6}>
+                    <h2 className='header--center'>No users found.</h2>
+                  </td>
+                </tr>
+              ) : (
+                (searchedItems as UserInfo[]).map((user) => (
+                  <User key={user.id} user={user} admin={userInfo} />
+                ))
+              )}
+            </>
+          ) : (
+            users.map((user) => (
+              <User key={user.id} user={user} admin={userInfo} />
+            ))
+          )}
         </tbody>
       </table>
     </div>

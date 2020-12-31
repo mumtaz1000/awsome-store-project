@@ -1,8 +1,8 @@
 import { useSearchContext } from '../state/search-context'
 import { useAsyncCall } from './useAsyncCall'
 import { firebase } from '../firebase/config'
-import { ordersIndex, productsIndex } from '../algolia'
-import { SearchedOrder, SearchedProduct } from '../types'
+import { ordersIndex, productsIndex, usersIndex } from '../algolia'
+import { SearchedOrder, SearchedProduct, SearchedUser } from '../types'
 
 export const useSearchItems = (pathname: string) => {
   const { loading, setLoading, error, setError } = useAsyncCall()
@@ -56,6 +56,28 @@ export const useSearchItems = (pathname: string) => {
         })
 
         setSearchedItems(orders)
+
+        setLoading(false)
+
+        return true
+      } else if (pathname === '/admin/manage-users') {
+        const result = await usersIndex.search<SearchedUser>(searchString)
+
+        const users = result.hits.map((item) => {
+          const createdAt = firebase.firestore.Timestamp.fromDate(
+            new Date(item.createdAt._seconds * 1000)
+          )
+
+          const updatedAt = item.updatedAt
+            ? firebase.firestore.Timestamp.fromDate(
+                new Date(item.updatedAt._seconds * 1000)
+              )
+            : undefined
+
+          return { ...item, id: item.objectID, createdAt, updatedAt }
+        })
+
+        setSearchedItems(users)
 
         setLoading(false)
 
