@@ -17,7 +17,7 @@ const ManageProducts: React.FC<Props> = () => {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null)
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
   const {
-    productsState: { products, loading, error },
+    productsState: { products, loading, error, searchedProducts },
   } = useProductsContext()
   const { openDialog, setOpenDialog } = useDialog()
   const {
@@ -65,16 +65,39 @@ const ManageProducts: React.FC<Props> = () => {
             </thead>
 
             <tbody>
-              {products.All.map((product) => (
-                <AdminProductItem
-                  key={product.id}
-                  product={product}
-                  setOpenProductForm={setOpenProductForm}
-                  setProductToEdit={setProductToEdit}
-                  setOpenDialog={setOpenDialog}
-                  setProductToDelete={setProductToDelete}
-                />
-              ))}
+              {searchedProducts ? (
+                <>
+                  {searchedProducts.length < 1 ? (
+                    <tr>
+                      <td colSpan={6}>
+                        <h2 className='header--center'>No products found.</h2>
+                      </td>
+                    </tr>
+                  ) : (
+                    searchedProducts.map((product) => (
+                      <AdminProductItem
+                        key={product.id}
+                        product={product}
+                        setOpenProductForm={setOpenProductForm}
+                        setProductToEdit={setProductToEdit}
+                        setOpenDialog={setOpenDialog}
+                        setProductToDelete={setProductToDelete}
+                      />
+                    ))
+                  )}
+                </>
+              ) : (
+                products.All.map((product) => (
+                  <AdminProductItem
+                    key={product.id}
+                    product={product}
+                    setOpenProductForm={setOpenProductForm}
+                    setProductToEdit={setProductToEdit}
+                    setOpenDialog={setOpenDialog}
+                    setProductToDelete={setProductToDelete}
+                  />
+                ))
+              )}
             </tbody>
           </table>
         )}

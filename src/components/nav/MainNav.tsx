@@ -1,5 +1,5 @@
-import React, { useState, ChangeEvent, KeyboardEvent } from 'react'
-import { NavLink } from 'react-router-dom'
+import React, { useState, ChangeEvent, KeyboardEvent, useEffect } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Button from '../Button'
@@ -7,8 +7,7 @@ import LoggedOutNav from './LoggedOutNav'
 import LoggedInNav from './LoggedInNav'
 import { useAuthContext } from '../../state/auth-context'
 import { useProductsContext } from '../../state/products-context'
-import { useSearchProducts } from '../../hooks/useSearchProducts'
-import { firebase } from '../../firebase/config'
+import { useSearchItems } from '../../hooks/useSearchItems'
 
 interface Props {}
 
@@ -22,7 +21,17 @@ const MainNav: React.FC<Props> = () => {
 
   const [searchString, setSearchString] = useState('')
 
-  const { searchProducts, loading, error } = useSearchProducts()
+  const location = useLocation()
+
+  const { searchItems, loading, error } = useSearchItems(location.pathname)
+
+  useEffect(() => {
+    if (!searchString) setSearchedProducts(null)
+  }, [searchString, setSearchedProducts])
+
+  useEffect(() => {
+    if (error) alert(error)
+  }, [error])
 
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) =>
     setSearchString(e.target.value)
@@ -36,28 +45,7 @@ const MainNav: React.FC<Props> = () => {
   const handleSearch = async () => {
     if (!searchString) return
 
-    const hits = await searchProducts(searchString)
-
-    if (!hits) {
-      if (error) alert(error)
-      return
-    }
-
-    const products = hits.map((item) => {
-      const createdAt = firebase.firestore.Timestamp.fromDate(
-        new Date(item.createdAt._seconds * 1000)
-      )
-
-      const updatedAt = item.updatedAt
-        ? firebase.firestore.Timestamp.fromDate(
-            new Date(item.updatedAt._seconds * 1000)
-          )
-        : undefined
-
-      return { ...item, id: item.objectID, createdAt, updatedAt }
-    })
-
-    setSearchedProducts(products)
+    return searchItems(searchString)
   }
 
   return (
@@ -93,7 +81,12 @@ const MainNav: React.FC<Props> = () => {
               />
             )}
           </div>
-          <Button className='btn--search' onClick={handleSearch}>
+          <Button
+            className='btn--search'
+            loading={loading}
+            disabled={loading}
+            onClick={handleSearch}
+          >
             SEARCH
           </Button>
         </div>
