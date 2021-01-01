@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
 
 import ProductItem from '../components/products/ProductItem'
@@ -27,6 +27,8 @@ const Index: React.FC<Props> = () => {
   const { searchedItems } = useSearchContext()
   const { activeTab } = useSelectTab<ProductTab>(prodTabType, 'All')
 
+  const [productsByCat, setProductsByCat] = useState(products[activeTab])
+
   const history = useHistory<{ from: string }>()
   const { state } = history.location
 
@@ -41,6 +43,11 @@ const Index: React.FC<Props> = () => {
       history.replace('/', undefined)
     }
   }, [setModalType, state, authUser, history, signoutRedirect])
+
+  // When the tab changed
+  useEffect(() => {
+    setProductsByCat(products[activeTab])
+  }, [activeTab, products])
 
   if (loading) return <Spinner color='grey' width={50} height={50} />
 
@@ -72,7 +79,7 @@ const Index: React.FC<Props> = () => {
             )}
           </>
         ) : (
-          products.All.map((product) => (
+          productsByCat.map((product) => (
             <ProductItem key={product.id} product={product} />
           ))
         )}
