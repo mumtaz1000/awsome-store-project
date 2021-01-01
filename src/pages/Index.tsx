@@ -8,7 +8,8 @@ import { useAuthContext } from '../state/auth-context'
 import { useModalContext } from '../state/modal-context'
 import { useProductsContext } from '../state/products-context'
 import { useSearchContext } from '../state/search-context'
-import { Product } from '../types'
+import { useSelectTab } from '../hooks/useSelectTab'
+import { Product, ProductTab } from '../types'
 import { productTabs } from '../helpers'
 
 export const prodTabType = 'cat'
@@ -24,6 +25,7 @@ const Index: React.FC<Props> = () => {
     productsState: { products, loading },
   } = useProductsContext()
   const { searchedItems } = useSearchContext()
+  const { activeTab } = useSelectTab<ProductTab>(prodTabType, 'All')
 
   const history = useHistory<{ from: string }>()
   const { state } = history.location
@@ -49,7 +51,12 @@ const Index: React.FC<Props> = () => {
     <div className='page--products'>
       <div className='products-category'>
         {productTabs.map((cat) => (
-          <Tab key={cat} label={cat} tabType={prodTabType} />
+          <Tab
+            key={cat}
+            label={cat}
+            tabType={prodTabType}
+            activeTab={activeTab}
+          />
         ))}
       </div>
 
