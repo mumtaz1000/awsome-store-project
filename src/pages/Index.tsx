@@ -56,8 +56,10 @@ const Index: React.FC<Props> = () => {
 
   // When the tab changed
   useEffect(() => {
-    setProductsByCat(products[activeTab])
-  }, [activeTab, products])
+    const startIndex = productsPerPage * (page - 1)
+    const endIndex = productsPerPage * page
+    setProductsByCat(products[activeTab].slice(startIndex, endIndex))
+  }, [activeTab, products, page])
 
   if (loading) return <Spinner color='grey' width={50} height={50} />
 
