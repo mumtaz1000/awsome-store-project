@@ -46,3 +46,6 @@ export const calculateCartAmount = (cart: (CartItem | PurchasedItem)[]) =>
     (amount, cartItem) => amount + cartItem.quantity * cartItem.item.price,
     0
   )
+
+export const calculateTotalPages = (totalItems: number, perPage: number) =>
+  Math.ceil(totalItems / perPage)

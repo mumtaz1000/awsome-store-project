@@ -10,10 +10,12 @@ import { useModalContext } from '../state/modal-context'
 import { useProductsContext } from '../state/products-context'
 import { useSearchContext } from '../state/search-context'
 import { useSelectTab } from '../hooks/useSelectTab'
+import { usePagination } from '../hooks/usePagination'
 import { Product, ProductTab } from '../types'
 import { productTabs } from '../helpers'
 
 export const prodTabType = 'cat'
+export const productsPerPage = 6
 
 interface Props {}
 
@@ -23,12 +25,19 @@ const Index: React.FC<Props> = () => {
     authState: { authUser, signoutRedirect },
   } = useAuthContext()
   const {
-    productsState: { products, loading },
+    productsState: { products, loading, productCounts },
   } = useProductsContext()
   const { searchedItems } = useSearchContext()
   const { activeTab } = useSelectTab<ProductTab>(prodTabType, 'All')
 
   const [productsByCat, setProductsByCat] = useState(products[activeTab])
+
+  const { page, totalPages } = usePagination<ProductTab, Product>(
+    productCounts[activeTab],
+    productsPerPage,
+    activeTab,
+    searchedItems as Product[]
+  )
 
   const history = useHistory<{ from: string }>()
   const { state } = history.location
@@ -71,8 +80,8 @@ const Index: React.FC<Props> = () => {
 
       <div className='pagination-container'>
         <Pagination
-          page={1}
-          totalPages={3}
+          page={page}
+          totalPages={totalPages}
           tabType={prodTabType}
           activeTab={activeTab}
         />
