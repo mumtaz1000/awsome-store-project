@@ -5,13 +5,25 @@ interface Props<T> {
   label: T
   tabType: string
   activeTab: T
+  withPagination?: boolean
 }
 
-const Tab = <T extends string>({ label, tabType, activeTab }: Props<T>) => {
+const Tab = <T extends string>({
+  label,
+  tabType,
+  activeTab,
+  withPagination,
+}: Props<T>) => {
   const { pathname } = useLocation()
 
   return (
-    <Link to={`${pathname}?${tabType}=${label}`}>
+    <Link
+      to={
+        withPagination
+          ? `${pathname}?${tabType}=${label}&page=1`
+          : `${pathname}?${tabType}=${label}`
+      }
+    >
       <p
         className={`paragraph ${
           label === activeTab ? 'btn-tab btn-tab--active' : 'btn-tab'

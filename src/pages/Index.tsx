@@ -4,6 +4,7 @@ import { useHistory } from 'react-router-dom'
 import ProductItem from '../components/products/ProductItem'
 import Spinner from '../components/Spinner'
 import Tab from '../components/Tab'
+import Pagination from '../components/Pagination'
 import { useAuthContext } from '../state/auth-context'
 import { useModalContext } from '../state/modal-context'
 import { useProductsContext } from '../state/products-context'
@@ -63,8 +64,18 @@ const Index: React.FC<Props> = () => {
             label={cat}
             tabType={prodTabType}
             activeTab={activeTab}
+            withPagination={true}
           />
         ))}
+      </div>
+
+      <div className='pagination-container'>
+        <Pagination
+          page={1}
+          totalPages={3}
+          tabType={prodTabType}
+          activeTab={activeTab}
+        />
       </div>
 
       <div className='products'>
