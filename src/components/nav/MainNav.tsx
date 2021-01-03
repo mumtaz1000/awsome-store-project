@@ -1,5 +1,5 @@
 import React, { useState, ChangeEvent, KeyboardEvent, useEffect } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useHistory } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 import Button from '../Button'
@@ -20,11 +20,15 @@ const MainNav: React.FC<Props> = () => {
   const [searchString, setSearchString] = useState('')
 
   const location = useLocation()
+  const history = useHistory()
 
   const { searchItems, loading, error } = useSearchItems(location.pathname)
 
   useEffect(() => {
-    if (!searchString) setSearchedItems(null)
+    if (!searchString) {
+      setSearchedItems(null)
+      history.replace(location.pathname)
+    }
   }, [searchString, setSearchedItems])
 
   useEffect(() => {
@@ -75,6 +79,7 @@ const MainNav: React.FC<Props> = () => {
                 onClick={() => {
                   setSearchString('')
                   setSearchedItems(null)
+                  history.replace(location.pathname)
                 }}
               />
             )}

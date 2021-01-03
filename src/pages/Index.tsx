@@ -31,6 +31,9 @@ const Index: React.FC<Props> = () => {
   const { activeTab } = useSelectTab<ProductTab>(prodTabType, 'All')
 
   const [productsByCat, setProductsByCat] = useState(products[activeTab])
+  const [paginatedSearchedItems, setPaginatedSearchedItems] = useState(
+    searchedItems
+  )
 
   const { page, totalPages } = usePagination<ProductTab, Product>(
     productCounts[activeTab],
@@ -58,7 +61,14 @@ const Index: React.FC<Props> = () => {
   useEffect(() => {
     const startIndex = productsPerPage * (page - 1)
     const endIndex = productsPerPage * page
-    setProductsByCat(products[activeTab].slice(startIndex, endIndex))
+
+    if (searchedItems) {
+      setPaginatedSearchedItems(searchedItems.slice(startIndex, endIndex))
+      setProductsByCat([])
+    } else {
+      setProductsByCat(products[activeTab].slice(startIndex, endIndex))
+      setPaginatedSearchedItems(null)
+    }
   }, [activeTab, products, page])
 
   if (loading) return <Spinner color='grey' width={50} height={50} />
@@ -84,18 +94,18 @@ const Index: React.FC<Props> = () => {
         <Pagination
           page={page}
           totalPages={totalPages}
-          tabType={prodTabType}
-          activeTab={activeTab}
+          tabType={searchedItems ? undefined : prodTabType}
+          activeTab={searchedItems ? undefined : activeTab}
         />
       </div>
 
       <div className='products'>
-        {searchedItems ? (
+        {paginatedSearchedItems ? (
           <>
-            {searchedItems.length < 1 ? (
+            {paginatedSearchedItems.length < 1 ? (
               <h2 className='header--center'>No products found.</h2>
             ) : (
-              (searchedItems as Product[]).map((product) => (
+              (paginatedSearchedItems as Product[]).map((product) => (
                 <ProductItem key={product.id} product={product} />
               ))
             )}
