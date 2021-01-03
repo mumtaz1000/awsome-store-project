@@ -83,6 +83,7 @@ export type UploadCartItem = Omit<
 
 export type PaymentStatus = 'Success' | 'Refund'
 
+export type OrderTab = 'All' | ShipmentStatus
 export type ShipmentStatus =
   | 'New'
   | 'Preparing'

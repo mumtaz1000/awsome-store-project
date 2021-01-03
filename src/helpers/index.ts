@@ -5,6 +5,7 @@ import {
   PurchasedItem,
   ShipmentStatus,
   ProductTab,
+  OrderTab,
 } from '../types'
 
 export const isAdmin = (role: Role | null) =>
@@ -33,6 +34,15 @@ export const productTabs: ProductTab[] = [
   'Shoes',
   'Watches',
   'Accessories',
+]
+
+export const orderTabs: OrderTab[] = [
+  'New',
+  'Preparing',
+  'Shipped',
+  'Delivered',
+  'Canceled',
+  'All',
 ]
 
 export const formatAmount = (amount: number) =>
