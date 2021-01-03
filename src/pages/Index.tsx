@@ -25,7 +25,7 @@ const Index: React.FC<Props> = () => {
     authState: { authUser, signoutRedirect },
   } = useAuthContext()
   const {
-    productsState: { products, loading, productCounts },
+    productsState: { products, loading, productCounts, queryMoreProducts },
   } = useProductsContext()
   const { searchedItems } = useSearchContext()
   const { activeTab } = useSelectTab<ProductTab>(prodTabType, 'All')
@@ -66,10 +66,18 @@ const Index: React.FC<Props> = () => {
       setPaginatedSearchedItems(searchedItems.slice(startIndex, endIndex))
       setProductsByCat([])
     } else {
+      if (
+        products[activeTab].length < productCounts[activeTab] &&
+        products[activeTab].length < productsPerPage * page
+      ) {
+        // Make a new query to the produccts collection in firestore
+
+        return queryMoreProducts()
+      }
       setProductsByCat(products[activeTab].slice(startIndex, endIndex))
       setPaginatedSearchedItems(null)
     }
-  }, [activeTab, products, page])
+  }, [activeTab, products, page, searchedItems, productCounts])
 
   if (loading) return <Spinner color='grey' width={50} height={50} />
 

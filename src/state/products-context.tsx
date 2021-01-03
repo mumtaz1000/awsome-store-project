@@ -9,7 +9,10 @@ import React, {
 
 import { useAsyncCall } from '../hooks/useAsyncCall'
 import { ProductTab, Product } from '../types'
+import { firebase } from '../firebase/config'
 import { productsRef, snapshotToDoc, productCountsRef } from '../firebase'
+
+const limitQuery = 9
 
 interface Props {}
 
@@ -29,6 +32,7 @@ type ProductsState = {
   productCounts: ProductCounts
   loading: boolean
   error: string
+  queryMoreProducts: () => void
 }
 type ProductsDispatch = {
   setProducts: Dispatch<SetStateAction<Products>>
@@ -59,41 +63,98 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
   const { loading, setLoading, error, setError } = useAsyncCall()
   const [products, setProducts] = useState(initialProducts)
   const [productCounts, setProductCounts] = useState(initialProductCounts)
+  const [
+    lastDocument,
+    setLastDocument,
+  ] = useState<firebase.firestore.DocumentData>()
 
-  // Fetch the products collection from firestore
-  useEffect(() => {
-    setLoading(true)
+  const queryMoreProducts = async () => {
+    try {
+      if (!lastDocument) return
 
-    const unsubscribe = productsRef.orderBy('createdAt', 'desc').onSnapshot({
-      next: (snapshots) => {
-        const allProducts: Product[] = []
+      setLoading(true)
 
-        snapshots.forEach((snapshot) => {
-          const product = snapshotToDoc<Product>(snapshot)
+      const snapshots = await productsRef
+        .orderBy('createdAt', 'desc')
+        .startAfter(lastDocument)
+        .limit(limitQuery)
+        .get()
 
-          allProducts.push(product)
-        })
+      const newQueries = snapshots.docs.map((snapshot) =>
+        snapshotToDoc<Product>(snapshot)
+      )
+      const lastVisible = snapshots.docs[snapshots.docs.length - 1]
+      setLastDocument(lastVisible)
 
+      // Combine the new queries with the existing state
+      setProducts((prev) => {
         const updatedProducts: any = {}
 
         Object.keys(initialProducts).forEach((cat) => {
           const category = cat as ProductTab
 
           category === 'All'
-            ? (updatedProducts.All = allProducts)
-            : (updatedProducts[category] = allProducts.filter(
-                (item) => item.category === category
-              ))
+            ? (updatedProducts.All = [...prev.All, ...newQueries])
+            : (updatedProducts[category] = [
+                ...prev[category],
+                ...newQueries.filter((item) => item.category === category),
+              ])
         }) // [All, Clothing, ...]
 
-        setProducts(updatedProducts)
-        setLoading(false)
-      },
-      error: (err) => {
-        setError(err.message)
-        setLoading(false)
-      },
-    })
+        return updatedProducts
+      })
+
+      setLoading(false)
+    } catch (err) {
+      const { message } = err as { message: string }
+
+      setError(message)
+      setLoading(false)
+    }
+  }
+
+  // Fetch the products collection from firestore (first query)
+  useEffect(() => {
+    setLoading(true)
+
+    const unsubscribe = productsRef
+      .orderBy('createdAt', 'desc')
+      .limit(limitQuery)
+      .onSnapshot({
+        next: (snapshots) => {
+          const allProducts = snapshots.docs.map((snapshot) =>
+            snapshotToDoc<Product>(snapshot)
+          )
+
+          // snapshots.forEach((snapshot) => {
+          //   const product = snapshotToDoc<Product>(snapshot)
+
+          //   allProducts.push(product)
+          // })
+
+          const lastVisible = snapshots.docs[snapshots.docs.length - 1]
+          setLastDocument(lastVisible)
+
+          const updatedProducts: any = {}
+
+          Object.keys(initialProducts).forEach((cat) => {
+            const category = cat as ProductTab
+
+            category === 'All'
+              ? (updatedProducts.All = allProducts)
+              : (updatedProducts[category] = allProducts.filter(
+                  (item) => item.category === category
+                ))
+          }) // [All, Clothing, ...]
+
+          setProducts(updatedProducts)
+          setLoading(false)
+        },
+        error: (err) => {
+          setError(err.message)
+          setLoading(false)
+        },
+      })
 
     return () => unsubscribe()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -114,7 +175,7 @@ const ProductsContextProvider: React.FC<Props> = ({ children }) => {
 
   return (
     <ProductsStateContext.Provider
-      value={{ products, productCounts, loading, error }}
+      value={{ products, productCounts, loading, error, queryMoreProducts }}
     >
       <ProductsDispatchContext.Provider value={{ setProducts }}>
         {children}
