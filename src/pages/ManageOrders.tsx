@@ -3,39 +3,70 @@ import React, { useState, useEffect } from 'react'
 import Spinner from '../components/Spinner'
 import ManageOrderItem from '../components/manage-orders/ManageOrderItem'
 import Tab from '../components/Tab'
+import Pagination from '../components/Pagination'
 import { orderTabType } from './Orders'
 import { useOrdersContext } from '../state/orders-context'
 import { useSearchContext } from '../state/search-context'
+import { useOrderCountsContext } from '../state/orderCounts-context'
 import { useSelectTab } from '../hooks/useSelectTab'
+import { usePagination } from '../hooks/usePagination'
 import { Order, OrderTab } from '../types'
 import { orderTabs } from '../helpers'
+
+const ordersPerPage = 20
 
 interface Props {}
 
 const ManageOrders: React.FC<Props> = () => {
   const {
-    ordersState: { orders, loading, error },
+    ordersState: { orders, loading, error, queryMoreOrders },
   } = useOrdersContext()
   const { searchedItems } = useSearchContext()
+  const {
+    orderCountsState: { orderCounts },
+  } = useOrderCountsContext()
 
-  const { activeTab } = useSelectTab<OrderTab>(orderTabType, 'New')
+  const { activeTab } = useSelectTab<OrderTab>(orderTabType, 'All')
+  const { page, totalPages } = usePagination<OrderTab, Order>(
+    orderCounts,
+    ordersPerPage,
+    activeTab,
+    searchedItems as Order[]
+  )
 
-  const [ordersByTab, setOrdersByTab] = useState(
-    orders ? orders.filter((order) => order.shipmentStatus === 'New') : null
+  const [ordersByTab, setOrdersByTab] = useState(orders)
+  const [paginatedSearchedItems, setPaginatedSearchedItems] = useState(
+    searchedItems
   )
 
   useEffect(() => {
-    if (!orders) {
-      setOrdersByTab(null)
-      return
-    }
+    const startIndex = ordersPerPage * (page - 1)
+    const endIndex = ordersPerPage * page
 
-    if (activeTab === 'All') setOrdersByTab(orders)
-    else
-      setOrdersByTab(
-        orders.filter((order) => order.shipmentStatus === activeTab)
-      )
-  }, [activeTab, orders, setOrdersByTab])
+    if (searchedItems) {
+      setPaginatedSearchedItems(searchedItems.slice(startIndex, endIndex))
+      setOrdersByTab([])
+    } else {
+      if (!orders) {
+        setOrdersByTab(null)
+        return
+      }
+
+      // Check if we need to query more orders
+      if (orders.length < orderCounts && orders.length < ordersPerPage * page) {
+        return queryMoreOrders()
+      }
+
+      if (activeTab === 'All')
+        setOrdersByTab(orders.slice(startIndex, endIndex))
+      else
+        setOrdersByTab(
+          orders.filter((order) => order.shipmentStatus === activeTab)
+        )
+
+      setPaginatedSearchedItems(null)
+    }
+  }, [activeTab, orders, setOrdersByTab, page, searchedItems, orderCounts])
 
   if (loading) return <Spinner color='grey' height={50} width={50} />
 
@@ -61,6 +92,17 @@ const ManageOrders: React.FC<Props> = () => {
         </div>
       </div>
 
+      <div className='orders-pagination'>
+        {activeTab === 'All' && (
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            tabType={orderTabType}
+            activeTab={activeTab}
+          />
+        )}
+      </div>
+
       <div className='orders-details'>
         <div className='orders-content'>
           <div className='orders-column'>
@@ -84,12 +126,12 @@ const ManageOrders: React.FC<Props> = () => {
         </div>
 
         {/* Order */}
-        {searchedItems ? (
+        {paginatedSearchedItems ? (
           <>
-            {searchedItems.length < 1 ? (
+            {paginatedSearchedItems.length < 1 ? (
               <h2 className='header--center'>No orders found.</h2>
             ) : (
-              (searchedItems as Order[]).map((order) => (
+              (paginatedSearchedItems as Order[]).map((order) => (
                 <ManageOrderItem key={order.id} order={order} />
               ))
             )}

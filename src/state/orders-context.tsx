@@ -11,7 +11,10 @@ import { useAuthContext } from './auth-context'
 import { useAsyncCall } from '../hooks/useAsyncCall'
 import { Order } from '../types'
 import { isAdmin, isClient } from '../helpers'
+import { firebase } from '../firebase/config'
 import { ordersRef, snapshotToDoc } from '../firebase'
+
+const ordersQueryLimit = 20
 
 interface Props {}
 
@@ -19,6 +22,7 @@ type OrdersState = {
   orders: Order[] | null
   loading: boolean
   error: string
+  queryMoreOrders: () => void
 }
 
 type OrdersDispatch = {
@@ -32,12 +36,48 @@ const OrdersDispatchContext = createContext<OrdersDispatch | undefined>(
 
 const OrdersContextProvider: React.FC<Props> = ({ children }) => {
   const [orders, setOrders] = useState<Order[] | null>(null)
+  const [
+    lastDocument,
+    setLastDocument,
+  ] = useState<firebase.firestore.DocumentData>()
 
   const { loading, setLoading, error, setError } = useAsyncCall()
   const {
     authState: { userInfo },
   } = useAuthContext()
 
+  // Next query
+  const queryMoreOrders = async () => {
+    try {
+      if (!lastDocument) return
+
+      setLoading(true)
+
+      const snapshots = await ordersRef
+        .orderBy('createdAt', 'desc')
+        .startAfter(lastDocument)
+        .limit(ordersQueryLimit)
+        .get()
+
+      const newOrders = snapshots.docs.map((snapshot) =>
+        snapshotToDoc<Order>(snapshot)
+      )
+
+      const lastVisible = snapshots.docs[snapshots.docs.length - 1]
+      setLastDocument(lastVisible)
+
+      // Combine the new orders with the existing state
+      setOrders((prev) => (prev ? [...prev, ...newOrders] : newOrders))
+      setLoading(false)
+    } catch (err) {
+      const { message } = err as { message: string }
+
+      setError(message)
+      setLoading(false)
+    }
+  }
+
+  // Query orders from firestore (first query)
   useEffect(() => {
     if (!userInfo) return setOrders(null)
 
@@ -69,23 +109,32 @@ const OrdersContextProvider: React.FC<Props> = ({ children }) => {
         })
     } else if (isAdmin(userInfo.role)) {
       // If the user i an admin, query all orders
-      unsubscribe = ordersRef.orderBy('createdAt', 'desc').onSnapshot({
-        next: (snapshots) => {
-          const orders: Order[] = []
-          snapshots.forEach((snapshot) => {
-            const order = snapshotToDoc<Order>(snapshot)
-            orders.push(order)
-          })
+      unsubscribe = ordersRef
+        .orderBy('createdAt', 'desc')
+        .limit(ordersQueryLimit)
+        .onSnapshot({
+          next: (snapshots) => {
+            const orders = snapshots.docs.map((snapshot) =>
+              snapshotToDoc<Order>(snapshot)
+            )
 
-          setOrders(orders)
-          setLoading(false)
-        },
-        error: (err) => {
-          setError(err.message)
-          setOrders(null)
-          setLoading(false)
-        },
-      })
+            // snapshots.forEach((snapshot) => {
+            //   const order = snapshotToDoc<Order>(snapshot)
+            //   orders.push(order)
+            // })
+
+            const lastVisible = snapshots.docs[snapshots.docs.length - 1]
+            setLastDocument(lastVisible)
+
+            setOrders(orders)
+            setLoading(false)
+          },
+          error: (err) => {
+            setError(err.message)
+            setOrders(null)
+            setLoading(false)
+          },
+        })
     }
 
     return () => unsubscribe()
@@ -93,7 +142,9 @@ const OrdersContextProvider: React.FC<Props> = ({ children }) => {
   }, [])
 
   return (
-    <OrdersStateContext.Provider value={{ orders, loading, error }}>
+    <OrdersStateContext.Provider
+      value={{ orders, loading, error, queryMoreOrders }}
+    >
       <OrdersDispatchContext.Provider value={{ setOrders }}>
         {children}
       </OrdersDispatchContext.Provider>

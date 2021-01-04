@@ -9,7 +9,7 @@ import React, {
 
 import { useAuthContext } from './auth-context'
 import { isAdmin } from '../helpers'
-import { orderCountsRef} from '../firebase'
+import { orderCountsRef } from '../firebase'
 
 interface Props {}
 
@@ -21,10 +21,12 @@ type OrderCountsDispatch = {
   setOrderCounts: Dispatch<SetStateAction<number>>
 }
 
-const OrderCountsStateContext = createContext<OrderCountsState | undefined>(undefined)
-const OrderCountsDispatchContext = createContext<OrderCountsDispatch | undefined>(
+const OrderCountsStateContext = createContext<OrderCountsState | undefined>(
   undefined
 )
+const OrderCountsDispatchContext = createContext<
+  OrderCountsDispatch | undefined
+>(undefined)
 
 const OrderCountsContextProvider: React.FC<Props> = ({ children }) => {
   const [orderCounts, setOrderCounts] = useState(0)
@@ -36,8 +38,8 @@ const OrderCountsContextProvider: React.FC<Props> = ({ children }) => {
   useEffect(() => {
     if (!userInfo || !isAdmin(userInfo.role)) return setOrderCounts(0)
 
-    const unsubscribe = orderCountsRef.doc('counts').onSnapshot(snapshot =>{
-      const counts = snapshot.data() as {orderCounts: number}
+    const unsubscribe = orderCountsRef.doc('counts').onSnapshot((snapshot) => {
+      const counts = snapshot.data() as { orderCounts: number }
 
       setOrderCounts(counts.orderCounts)
     })
@@ -57,14 +59,14 @@ const OrderCountsContextProvider: React.FC<Props> = ({ children }) => {
 
 export default OrderCountsContextProvider
 
-export const useOrdersContext = () => {
-  const ordersState = useContext(OrderCountsStateContext)
-  const ordersDispatch = useContext(OrderCountsDispatchContext)
+export const useOrderCountsContext = () => {
+  const orderCountsState = useContext(OrderCountsStateContext)
+  const orderCountsDispatch = useContext(OrderCountsDispatchContext)
 
-  if (ordersState === undefined || ordersDispatch === undefined)
+  if (orderCountsState === undefined || orderCountsDispatch === undefined)
     throw new Error(
       'useOrdersContext must be used within OrderCountsContextProvider.'
     )
 
-  return { ordersState, ordersDispatch }
+  return { orderCountsState, orderCountsDispatch }
 }
