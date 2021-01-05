@@ -50,6 +50,7 @@ const ManageUsers: React.FC<Props> = ({ userInfo }) => {
       setUsersByPage(users.slice(startIndex, endIndex))
       setPaginatedSearchedItems(null)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchedItems, users, page, userCounts])
 
   if (loading) return <Spinner color='grey' height={50} width={50} />
