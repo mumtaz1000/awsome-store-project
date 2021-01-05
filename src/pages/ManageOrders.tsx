@@ -87,6 +87,7 @@ const ManageOrders: React.FC<Props> = () => {
               label={tab}
               activeTab={activeTab}
               tabType={orderTabType}
+              withPagination={true}
             />
           ))}
         </div>

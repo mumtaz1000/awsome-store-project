@@ -1,18 +1,56 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 
 import Spinner from '../components/Spinner'
+import Pagination from '../components/Pagination'
 import User from '../components/manage-users/User'
 import { useSearchContext } from '../state/search-context'
 import { useFetchUsers } from '../hooks/useFetchUsers'
+import { usePagination } from '../hooks/usePagination'
 import { UserInfo } from '../types'
+
+const usersPerPage = 10
 
 interface Props {
   userInfo: UserInfo
 }
 
 const ManageUsers: React.FC<Props> = ({ userInfo }) => {
-  const { users, userCounts, loading, error } = useFetchUsers(userInfo)
+  const { users, userCounts, loading, error, queryMoreUsers } = useFetchUsers(
+    userInfo
+  )
   const { searchedItems } = useSearchContext()
+  const { page, totalPages } = usePagination(
+    userCounts,
+    usersPerPage,
+    undefined,
+    searchedItems as UserInfo[]
+  )
+
+  const [usersByPage, setUsersByPage] = useState(users)
+  const [paginatedSearchedItems, setPaginatedSearchedItems] = useState(
+    searchedItems
+  )
+
+  useEffect(() => {
+    const startIndex = usersPerPage * (page - 1)
+    const endIndex = usersPerPage * page
+
+    if (searchedItems) {
+      setPaginatedSearchedItems(searchedItems.slice(startIndex, endIndex))
+      setUsersByPage([])
+    } else {
+      if (!users) return
+
+      // Check if we need to query more users
+      if (users.length < userCounts && users.length < usersPerPage * page) {
+        queryMoreUsers()
+        return
+      }
+
+      setUsersByPage(users.slice(startIndex, endIndex))
+      setPaginatedSearchedItems(null)
+    }
+  }, [searchedItems, users, page, userCounts])
 
   if (loading) return <Spinner color='grey' height={50} width={50} />
 
@@ -24,6 +62,8 @@ const ManageUsers: React.FC<Props> = ({ userInfo }) => {
   return (
     <div className='page--manage-users'>
       <h2 className='header--center'>Manage users</h2>
+
+      <Pagination page={page} totalPages={totalPages} />
 
       <table className='table table--manage-users'>
         <thead>
@@ -53,22 +93,23 @@ const ManageUsers: React.FC<Props> = ({ userInfo }) => {
         </thead>
 
         <tbody>
-          {searchedItems ? (
+          {paginatedSearchedItems ? (
             <>
-              {searchedItems.length < 1 ? (
+              {paginatedSearchedItems.length < 1 ? (
                 <tr>
                   <td colSpan={6}>
                     <h2 className='header--center'>No users found.</h2>
                   </td>
                 </tr>
               ) : (
-                (searchedItems as UserInfo[]).map((user) => (
+                (paginatedSearchedItems as UserInfo[]).map((user) => (
                   <User key={user.id} user={user} admin={userInfo} />
                 ))
               )}
             </>
           ) : (
-            users.map((user) => (
+            usersByPage &&
+            usersByPage.map((user) => (
               <User key={user.id} user={user} admin={userInfo} />
             ))
           )}
