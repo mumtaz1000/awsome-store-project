@@ -1,15 +1,19 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import AdminProductItem from '../components/manage-products/AdminProductItem'
 import Button from '../components/Button'
 import Spinner from '../components/Spinner'
 import AddAndEditProduct from '../components/manage-products/AddAndEditProduct'
 import AlertDialog from '../components/dialogs/AlertDialog'
+import Pagination from '../components/Pagination'
 import { useProductsContext } from '../state/products-context'
-import {useSearchContext} from '../state/search-context'
+import { useSearchContext } from '../state/search-context'
 import { useManageProduct } from '../hooks/useManageProduct'
 import { useDialog } from '../hooks/useDialog'
+import { usePagination } from '../hooks/usePagination'
 import { Product } from '../types'
+
+const productsPerPage = 10
 
 interface Props {}
 
@@ -18,15 +22,55 @@ const ManageProducts: React.FC<Props> = () => {
   const [productToEdit, setProductToEdit] = useState<Product | null>(null)
   const [productToDelete, setProductToDelete] = useState<Product | null>(null)
   const {
-    productsState: { products, loading, error },
+    productsState: {
+      products,
+      loading,
+      error,
+      productCounts,
+      queryMoreProducts,
+    },
   } = useProductsContext()
-  const {searchedItems} = useSearchContext()
+  const { searchedItems } = useSearchContext()
   const { openDialog, setOpenDialog } = useDialog()
   const {
     deleteProduct,
     loading: deleteProdLoading,
     error: deleteProdError,
   } = useManageProduct()
+  const { page, totalPages } = usePagination(
+    productCounts.All,
+    productsPerPage,
+    undefined,
+    searchedItems as Product[]
+  )
+
+  const [productsByPage, setProductsByPage] = useState(products.All)
+  const [paginatedSearchedItems, setPaginatedSearchedItems] = useState(
+    searchedItems
+  )
+
+  useEffect(() => {
+    const startIndex = productsPerPage * (page - 1)
+    const endIndex = productsPerPage * page
+
+    if (searchedItems) {
+      setPaginatedSearchedItems(searchedItems.slice(startIndex, endIndex))
+      setProductsByPage([])
+    } else {
+      // Check if we need to query more products
+      if (
+        products.All.length < productCounts.All &&
+        products.All.length < productsPerPage * page
+      ) {
+        queryMoreProducts()
+        return
+      }
+
+      setProductsByPage(products.All.slice(startIndex, endIndex))
+      setPaginatedSearchedItems(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products.All, productCounts.All, page, searchedItems])
 
   if (loading) return <Spinner color='grey' width={50} height={50} />
 
@@ -50,6 +94,12 @@ const ManageProducts: React.FC<Props> = () => {
         )}
       </div>
 
+      {totalPages > 0 && (
+        <div className='pagination-container'>
+          <Pagination page={page} totalPages={totalPages} />
+        </div>
+      )}
+
       <div className='manage-products__section'>
         {!loading && products.All.length === 0 ? (
           <h2 className='header--center'>No products, let's add one.</h2>
@@ -67,16 +117,16 @@ const ManageProducts: React.FC<Props> = () => {
             </thead>
 
             <tbody>
-              {searchedItems ? (
+              {paginatedSearchedItems ? (
                 <>
-                  {searchedItems.length < 1 ? (
+                  {paginatedSearchedItems.length < 1 ? (
                     <tr>
                       <td colSpan={6}>
                         <h2 className='header--center'>No products found.</h2>
                       </td>
                     </tr>
                   ) : (
-                    (searchedItems as Product[]).map((product) => (
+                    (paginatedSearchedItems as Product[]).map((product) => (
                       <AdminProductItem
                         key={product.id}
                         product={product}
@@ -89,7 +139,8 @@ const ManageProducts: React.FC<Props> = () => {
                   )}
                 </>
               ) : (
-                products.All.map((product) => (
+                productsByPage &&
+                productsByPage.map((product) => (
                   <AdminProductItem
                     key={product.id}
                     product={product}
