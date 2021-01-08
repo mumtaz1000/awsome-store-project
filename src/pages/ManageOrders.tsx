@@ -13,7 +13,7 @@ import { usePagination } from '../hooks/usePagination'
 import { Order, OrderTab } from '../types'
 import { orderTabs } from '../helpers'
 
-const ordersPerPage = 20
+const ordersPerPage = 10
 
 interface Props {}
 

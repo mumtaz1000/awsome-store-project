@@ -14,7 +14,7 @@ import { isAdmin, isClient } from '../helpers'
 import { firebase } from '../firebase/config'
 import { ordersRef, snapshotToDoc } from '../firebase'
 
-const ordersQueryLimit = 20
+const ordersQueryLimit = 30
 
 interface Props {}
 

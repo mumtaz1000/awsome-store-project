@@ -15,7 +15,7 @@ import { Product, ProductTab } from '../types'
 import { productTabs } from '../helpers'
 
 export const prodTabType = 'cat'
-export const productsPerPage = 6
+export const productsPerPage = 9
 
 interface Props {}
 

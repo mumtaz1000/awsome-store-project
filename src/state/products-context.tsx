@@ -12,7 +12,7 @@ import { ProductTab, Product } from '../types'
 import { firebase } from '../firebase/config'
 import { productsRef, snapshotToDoc, productCountsRef } from '../firebase'
 
-const limitQuery = 9
+const limitQuery = 30
 
 interface Props {}
 
