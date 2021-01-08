@@ -5,7 +5,7 @@ import { useHistory } from 'react-router-dom'
 import Button from '../Button'
 import Input from '../Input'
 import { useModalContext } from '../../state/modal-context'
-import { useAuthenticate } from '../../hooks'
+import { useAuthenticate } from '../../hooks/useAuthenticate'
 import { SignupData } from '../../types'
 import SocialMediaLogin from './SocialMediaLogin'
 

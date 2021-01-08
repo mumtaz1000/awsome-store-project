@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form'
 import Button from '../Button'
 import Input from '../Input'
 import { useModalContext } from '../../state/modal-context'
-import { useAuthenticate } from '../../hooks'
+import { useAuthenticate } from '../../hooks/useAuthenticate'
 import { SignupData } from '../../types'
 
 interface Props {}
